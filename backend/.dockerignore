@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+node_modules
+npm-debug.log
+vendor
+storage/*.key
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+tests
+.phpunit.cache
+docker

@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ia-system-app
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      - APP_ENV=local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ia-system
+
+  nginx:
+    image: nginx:alpine
+    container_name: ia-system-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - ia-system
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ia-system-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ia_system
+      POSTGRES_USER: ia_system
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ia_system -d ia_system"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ia-system
+
+volumes:
+  postgres_data:
+
+networks:
+  ia-system:
+    driver: bridge
