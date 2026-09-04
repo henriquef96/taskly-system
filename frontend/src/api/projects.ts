@@ -1,5 +1,5 @@
 import { httpClient } from '@/api/httpClient'
-import type { Collection, Project, ProjectInput, Task, TaskInput } from '@/types/api'
+import type { Collection, DataEnvelope, Project, ProjectInput, Task, TaskInput } from '@/types/api'
 
 export async function listProjects(): Promise<Collection<Project>> {
   const { data } = await httpClient.get<Collection<Project>>('/projects')
@@ -7,18 +7,18 @@ export async function listProjects(): Promise<Collection<Project>> {
 }
 
 export async function createProject(input: ProjectInput): Promise<Project> {
-  const { data } = await httpClient.post<Project>('/projects', input)
-  return data
+  const { data } = await httpClient.post<DataEnvelope<Project>>('/projects', input)
+  return data.data
 }
 
 export async function getProject(projectId: number): Promise<Project> {
-  const { data } = await httpClient.get<Project>(`/projects/${projectId}`)
-  return data
+  const { data } = await httpClient.get<DataEnvelope<Project>>(`/projects/${projectId}`)
+  return data.data
 }
 
 export async function updateProject(projectId: number, input: ProjectInput): Promise<Project> {
-  const { data } = await httpClient.patch<Project>(`/projects/${projectId}`, input)
-  return data
+  const { data } = await httpClient.patch<DataEnvelope<Project>>(`/projects/${projectId}`, input)
+  return data.data
 }
 
 export async function deleteProject(projectId: number): Promise<void> {

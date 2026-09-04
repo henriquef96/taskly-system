@@ -81,7 +81,7 @@ export interface ProjectRequest {
 }
 
 export interface ProjectInput {
-  name?: string
+  name: string
   description?: string | null
   status?: ProjectStatus
 }

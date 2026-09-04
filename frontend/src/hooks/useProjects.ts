@@ -15,7 +15,34 @@ export function useCreateProject() {
 }
 
 export function useProject(projectId: number) {
-  return useQuery({ queryKey: ['projects', projectId], queryFn: () => projectsApi.getProject(projectId) })
+  return useQuery({
+    queryKey: ['projects', projectId],
+    queryFn: () => projectsApi.getProject(projectId),
+    enabled: Number.isInteger(projectId) && projectId > 0,
+  })
+}
+
+export function useUpdateProject() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ projectId, input }: { projectId: number; input: ProjectInput }) =>
+      projectsApi.updateProject(projectId, input),
+    onSuccess: (project) => {
+      queryClient.setQueryData(['projects', project.id], project)
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+    },
+  })
+}
+
+export function useDeleteProject() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (projectId: number) => projectsApi.deleteProject(projectId),
+    onSuccess: (_data, projectId) => {
+      queryClient.removeQueries({ queryKey: ['projects', projectId] })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+    },
+  })
 }
 
 export function useProjectTasks(projectId: number) {
