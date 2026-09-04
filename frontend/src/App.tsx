@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { DashboardPage } from '@/pages/DashboardPage'
-import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { ProjectDetailPage } from '@/pages/ProjectDetailPage'
@@ -21,7 +20,7 @@ function PublicRoute({ children }: { children: ReactNode }) {
 
 function App() {
   return <Routes>
-    <Route path="/" element={<HomePage />} />
+    <Route path="/" element={<Navigate to="/login" replace />} />
     <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
     <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
