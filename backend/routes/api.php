@@ -17,4 +17,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::apiResource('projects.tasks', TaskController::class)->except(['create', 'edit']);
     });
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
+    Route::post('/tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
+    Route::delete('/attachments/{attachment}', [TaskController::class, 'deleteAttachment']);
 });

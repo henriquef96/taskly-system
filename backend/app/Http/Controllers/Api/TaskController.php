@@ -7,18 +7,24 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Requests\UpdateTaskStatusRequest;
+use App\Http\Requests\UploadAttachmentRequest;
+use App\Http\Resources\TaskAttachmentResource;
 use App\Http\Resources\TaskResource;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskAttachment;
+use App\Services\TaskAttachmentService;
 use App\Services\TaskService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 
 class TaskController extends Controller
 {
     public function __construct(
         private readonly TaskService $taskService,
+        private readonly TaskAttachmentService $taskAttachmentService,
     ) {}
 
     public function index(Project $project): AnonymousResourceCollection
@@ -64,5 +70,30 @@ class TaskController extends Controller
         return new TaskResource(
             $this->taskService->updateStatus($task, TaskStatus::from($request->validated('status'))),
         );
+    }
+
+    public function uploadAttachment(
+        UploadAttachmentRequest $request,
+        Task $task,
+    ): TaskAttachmentResource {
+        Gate::authorize('update', $task);
+
+        $file = $request->file('file');
+
+        if (! $file instanceof UploadedFile) {
+            abort(422, 'The uploaded file is invalid.');
+        }
+
+        return new TaskAttachmentResource(
+            $this->taskAttachmentService->store($task, $file),
+        );
+    }
+
+    public function deleteAttachment(TaskAttachment $attachment): Response
+    {
+        Gate::authorize('delete', $attachment->task);
+        $this->taskAttachmentService->delete($attachment);
+
+        return response()->noContent();
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['project_id', 'title', 'short_description', 'full_description', 'due_date', 'status', 'position'])]
 class Task extends Model
@@ -53,5 +54,13 @@ class Task extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'task_tag');
+    }
+
+    /**
+     * The files attached to the task.
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TaskAttachment::class);
     }
 }
