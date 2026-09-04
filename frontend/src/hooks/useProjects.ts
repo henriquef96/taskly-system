@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as projectsApi from '@/api/projects'
 import type { ProjectInput, TaskInput, TaskStatus } from '@/types/api'
 
@@ -51,6 +51,25 @@ export function useProjectTasks(projectId: number) {
     queryFn: () => projectsApi.listTasks(projectId),
     enabled: Number.isInteger(projectId) && projectId > 0,
   })
+}
+
+export function useDashboardData() {
+  const projectsQuery = useProjects()
+  const projectIds = projectsQuery.data?.data.map((project) => project.id) ?? []
+  const taskQueries = useQueries({
+    queries: projectIds.map((projectId) => ({
+      queryKey: ['projects', projectId, 'tasks'],
+      queryFn: () => projectsApi.listTasks(projectId),
+    })),
+  })
+
+  return {
+    projectsQuery,
+    taskQueries,
+    tasks: taskQueries.flatMap((query) => query.data?.data ?? []),
+    isLoading: projectsQuery.isLoading || taskQueries.some((query) => query.isLoading),
+    error: projectsQuery.error ?? taskQueries.find((query) => query.error)?.error,
+  }
 }
 
 export function useCreateTask(projectId: number) {
