@@ -22,3 +22,19 @@ export const registerSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>
 export type RegisterFormValues = z.infer<typeof registerSchema>
+
+export interface ProjectFormValues {
+  name: string
+  description: string
+  status: 'active' | 'completed' | 'archived'
+}
+
+export interface TaskFormValues {
+  title: string
+  short_description: string
+  full_description: string
+  due_date: string
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+  position: number
+  tags: number[]
+}

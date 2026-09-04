@@ -20,7 +20,7 @@ const LABELS: Record<StatusBadgeProps['state'], string> = {
  */
 export function StatusBadge({ state, message }: StatusBadgeProps) {
   return (
-    <div className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${STYLES[state]}`}>
+    <div className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${STYLES[state]}`} role="status" aria-live="polite">
       <span className="relative flex h-2 w-2">
         <span className="absolute inline-flex h-full w-full rounded-full bg-current opacity-75" />
       </span>

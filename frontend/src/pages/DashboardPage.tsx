@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '@/api/ApiError'
+import { getApiErrorMessage } from '@/api/errorMessage'
 import { DashboardSkeleton } from '@/components/feedback/DashboardSkeleton'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
@@ -142,13 +143,14 @@ export function DashboardPage() {
       </div>
       {isCreating && (
         <div className="mb-6">
-          <ProjectForm isSubmitting={createProject.isPending} serverError={createProject.error instanceof ApiError ? createProject.error.message : undefined} onSubmit={handleCreate} onCancel={() => setIsCreating(false)} />
+          <ProjectForm isSubmitting={createProject.isPending} serverError={createProject.error ? getApiErrorMessage(createProject.error, 'Não foi possível criar o projeto.') : undefined} serverErrors={createProject.error instanceof ApiError ? createProject.error.errors : undefined} onSubmit={handleCreate} onCancel={() => setIsCreating(false)} />
         </div>
       )}
       {dashboard.isLoading && <DashboardSkeleton />}
       {!dashboard.isLoading && dashboard.error && (
-        <ErrorState title="Não foi possível carregar seu dashboard" message={dashboard.error instanceof ApiError ? dashboard.error.message : 'Tente novamente em alguns instantes.'} onRetry={retry} />
+        <ErrorState title="Não foi possível carregar seu dashboard" message={getApiErrorMessage(dashboard.error, 'Tente novamente em alguns instantes.')} onRetry={retry} />
       )}
+      {deleteProject.error && <p className="mb-4 text-sm text-red-600" role="alert">{getApiErrorMessage(deleteProject.error, 'Não foi possível excluir o projeto.')}</p>}
       {!dashboard.isLoading && !dashboard.error && projects.length === 0 && (
         <EmptyState title="Comece criando seu primeiro projeto" message="Organize suas tarefas por projetos e acompanhe seu progresso por aqui." />
       )}

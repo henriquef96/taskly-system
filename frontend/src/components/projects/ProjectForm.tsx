@@ -1,19 +1,15 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import type { Project, ProjectInput, ProjectStatus } from '@/types/api'
+import type { ProjectFormValues } from '@/types/forms'
 
 interface ProjectFormProps {
   project?: Project
   isSubmitting: boolean
   serverError?: string
+  serverErrors?: Record<string, string[]>
   onSubmit: (input: ProjectInput) => void
   onCancel?: () => void
-}
-
-interface ProjectFormValues {
-  name: string
-  description: string
-  status: ProjectStatus
 }
 
 const statusOptions: Array<{ value: ProjectStatus; label: string }> = [
@@ -22,7 +18,7 @@ const statusOptions: Array<{ value: ProjectStatus; label: string }> = [
   { value: 'archived', label: 'Arquivado' },
 ]
 
-export function ProjectForm({ project, isSubmitting, serverError, onSubmit, onCancel }: ProjectFormProps) {
+export function ProjectForm({ project, isSubmitting, serverError, serverErrors = {}, onSubmit, onCancel }: ProjectFormProps) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProjectFormValues>({
     defaultValues: {
       name: project?.name ?? '',
@@ -53,11 +49,13 @@ export function ProjectForm({ project, isSubmitting, serverError, onSubmit, onCa
         <label htmlFor="project-name" className="text-sm font-medium text-slate-700">Nome</label>
         <input
           id="project-name"
+          aria-invalid={Boolean(errors.name || serverErrors.name)}
+          aria-describedby={errors.name || serverErrors.name ? 'project-name-error' : undefined}
           {...register('name', { required: 'Informe o nome do projeto', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })}
           className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
           autoFocus
         />
-        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+        {(errors.name || serverErrors.name) && <p id="project-name-error" className="mt-1 text-sm text-red-600">{errors.name?.message ?? serverErrors.name?.join(' ')}</p>}
       </div>
       <div>
         <label htmlFor="project-description" className="text-sm font-medium text-slate-700">Descrição</label>
@@ -75,6 +73,7 @@ export function ProjectForm({ project, isSubmitting, serverError, onSubmit, onCa
           {statusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </div>
+      {serverErrors.description?.map((message) => <p key={message} className="text-sm text-red-600">{message}</p>)}
       {serverError && <p className="text-sm text-red-600" role="alert">{serverError}</p>}
       <div className="flex justify-end gap-3">
         {onCancel && <button type="button" onClick={onCancel} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">Cancelar</button>}

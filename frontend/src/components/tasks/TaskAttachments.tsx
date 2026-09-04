@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ApiError } from '@/api/ApiError'
+import { getApiErrorMessage } from '@/api/errorMessage'
 import { useDeleteTaskAttachment, useUploadTaskAttachment } from '@/hooks/useProjects'
 import type { Attachment } from '@/types/api'
 
@@ -46,13 +46,13 @@ export function TaskAttachments({ projectId, taskId, attachments }: TaskAttachme
   }
 
   const mutationError = upload.error ?? remove.error
-  const errorMessage = uploadError ?? (mutationError instanceof ApiError ? mutationError.message : undefined)
+  const errorMessage = uploadError ?? (mutationError ? getApiErrorMessage(mutationError, 'Não foi possível atualizar os anexos.') : undefined)
 
   return (
     <div className="mt-3 border-t border-slate-100 pt-3">
       <div className="flex items-center justify-between gap-2">
         <h5 className="text-xs font-semibold text-slate-700">Anexos</h5>
-        <button type="button" onClick={() => inputRef.current?.click()} disabled={upload.isPending || remove.isPending} className="text-xs font-medium text-indigo-600 disabled:opacity-60">
+        <button type="button" onClick={() => inputRef.current?.click()} disabled={upload.isPending || remove.isPending} className="rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60">
           {upload.isPending ? 'Enviando...' : 'Adicionar arquivo'}
         </button>
         <input ref={inputRef} type="file" className="sr-only" accept={ACCEPTED_EXTENSIONS.map((extension) => `.${extension}`).join(',')} onChange={(event) => { handleFile(event.target.files?.[0]); event.target.value = '' }} />
@@ -67,6 +67,7 @@ export function TaskAttachments({ projectId, taskId, attachments }: TaskAttachme
           </li>)}
         </ul>
       )}
+      {attachments?.length === 0 && <p className="mt-2 text-xs text-slate-500">Nenhum anexo.</p>}
     </div>
   )
 }

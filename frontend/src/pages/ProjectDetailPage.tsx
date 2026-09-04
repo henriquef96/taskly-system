@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ApiError } from '@/api/ApiError'
+import { getApiErrorMessage } from '@/api/errorMessage'
 import { ProjectForm } from '@/components/projects/ProjectForm'
 import { TaskManager } from '@/components/tasks/TaskManager'
 import { ErrorState } from '@/components/feedback/ErrorState'
@@ -37,12 +38,14 @@ export function ProjectDetailPage() {
         {project && <button type="button" onClick={handleDelete} disabled={deleteProject.isPending} className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60">Excluir projeto</button>}
       </div>
       {projectQuery.isLoading && <LoadingState label="Carregando projeto..." />}
-      {projectQuery.error && <ErrorState title="Não foi possível carregar o projeto" message={projectQuery.error instanceof ApiError ? projectQuery.error.message : 'Tente novamente em alguns instantes.'} />}
+      {projectQuery.error && <ErrorState title="Não foi possível carregar o projeto" message={getApiErrorMessage(projectQuery.error, 'Tente novamente em alguns instantes.')} onRetry={() => void projectQuery.refetch()} />}
+      {deleteProject.error && <p className="mb-4 text-sm text-red-600" role="alert">{getApiErrorMessage(deleteProject.error, 'Não foi possível excluir o projeto.')}</p>}
       {project && (
         <ProjectForm
           project={project}
           isSubmitting={updateProject.isPending}
-          serverError={updateProject.error instanceof ApiError ? updateProject.error.message : undefined}
+          serverError={updateProject.error ? getApiErrorMessage(updateProject.error, 'Não foi possível salvar o projeto.') : undefined}
+          serverErrors={updateProject.error instanceof ApiError ? updateProject.error.errors : undefined}
           onSubmit={handleUpdate}
         />
       )}

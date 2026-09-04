@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { TagSelector } from '@/components/tasks/TagSelector'
-import type { Task, TaskInput, TaskStatus } from '@/types/api'
+import type { Task, TaskInput } from '@/types/api'
 import { TASK_STATUS_VALUES, getTaskStatusLabel } from '@/types/api'
 import type { Tag } from '@/types/tags'
+import type { TaskFormValues } from '@/types/forms'
 
 interface TaskFormProps {
   task?: Task
@@ -13,16 +14,6 @@ interface TaskFormProps {
   onCancel: () => void
   availableTags: Tag[]
   serverErrors?: Record<string, string[]>
-}
-
-interface TaskFormValues {
-  title: string
-  short_description: string
-  full_description: string
-  due_date: string
-  status: TaskStatus
-  position: number
-  tags: number[]
 }
 
 const toDateInput = (value: string | null | undefined) => value ? value.slice(0, 16) : ''
@@ -68,12 +59,12 @@ export function TaskForm({ task, isSubmitting, serverError, serverErrors = {}, o
     <form onSubmit={(event) => void handleSubmit(submit)(event)} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-medium text-slate-700">Título
-          <input {...register('title', { required: 'Informe o título', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500" />
-          {errors.title && <span className="mt-1 block text-xs text-red-600">{errors.title.message}</span>}
+          <input id="task-title" aria-invalid={Boolean(errors.title || serverErrors.title)} aria-describedby={errors.title || serverErrors.title ? 'task-title-error' : undefined} {...register('title', { required: 'Informe o título', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+          {(errors.title || serverErrors.title) && <span id="task-title-error" className="mt-1 block text-xs text-red-600">{errors.title?.message ?? serverErrors.title?.join(' ')}</span>}
         </label>
         <label className="text-sm font-medium text-slate-700">Descrição curta
-          <input {...register('short_description', { required: 'Informe a descrição curta', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500" />
-          {errors.short_description && <span className="mt-1 block text-xs text-red-600">{errors.short_description.message}</span>}
+          <input id="task-short-description" aria-invalid={Boolean(errors.short_description || serverErrors.short_description)} aria-describedby={errors.short_description || serverErrors.short_description ? 'task-short-description-error' : undefined} {...register('short_description', { required: 'Informe a descrição curta', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+          {(errors.short_description || serverErrors.short_description) && <span id="task-short-description-error" className="mt-1 block text-xs text-red-600">{errors.short_description?.message ?? serverErrors.short_description?.join(' ')}</span>}
         </label>
       </div>
       <label className="block text-sm font-medium text-slate-700">Descrição completa
