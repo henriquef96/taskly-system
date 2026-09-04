@@ -130,3 +130,10 @@ Consiste em um gerenciador pessoal de tarefas nomeado Taskly. O sistema contempl
 ### Passo 5: Módulo de Status e Anexos
 - Endpoint leve para atualização de status: `PATCH /api/tasks/{task}/status`.
 - Endpoints de upload e remoção de anexos: `POST /api/tasks/{task}/attachments` e `DELETE /api/attachments/{attachment}`.
+
+### Testes e documentação da API
+- Os testes de integração da API ficam em `backend/tests/Feature/Api`.
+- Execute-os com `docker compose exec app php artisan test`; a saída deve usar descrições legíveis via TestDox.
+- Não manter testes de exemplo ou testes que apenas validem `true`; cada teste deve verificar um fluxo real da API com mensagens de asserção explicativas.
+- Para testes manuais, usar Postman com `Accept: application/json`, autenticar via `/api/register` ou `/api/login` e enviar o token como `Authorization: Bearer <token>`.
+- A visualização Swagger UI fica em `http://localhost:8080/docs`, e o contrato OpenAPI em `http://localhost:8080/docs/openapi.yaml`.

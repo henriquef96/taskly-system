@@ -15,6 +15,7 @@ dist-ssr
 # Ambiente
 .env
 .env.local
+prompt
 
 # Editor directories and files
 .vscode/*

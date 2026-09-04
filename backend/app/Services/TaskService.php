@@ -19,6 +19,7 @@ class TaskService
     /** @param array<string, mixed> $data */
     public function create(Project $project, array $data): Task
     {
+        $data['status'] ??= TaskStatus::Pending;
         $tags = $data['tags'] ?? null;
         unset($data['tags']);
 

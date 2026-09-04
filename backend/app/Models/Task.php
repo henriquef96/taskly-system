@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,7 +26,6 @@ class Task extends Model
     {
         return [
             'status' => TaskStatus::class,
-            'priority' => TaskPriority::class,
             'due_date' => 'datetime',
         ];
     }
@@ -38,14 +36,6 @@ class Task extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
-    }
-
-    /**
-     * The user responsible for the task, if any.
-     */
-    public function assignee(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

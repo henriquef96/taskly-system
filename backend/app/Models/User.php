@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -38,13 +37,5 @@ class User extends Authenticatable
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
-    }
-
-    /**
-     * The tasks assigned to the user.
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
     }
 }

@@ -20,8 +20,41 @@ docker compose up -d --build
 docker compose exec app php artisan migrate
 ```
 
-A API fica disponível em `http://localhost:8080`. Health-check: `GET /api/health`.
+A API fica disponível em `http://localhost:8080`. A documentação interativa Swagger UI está em `http://localhost:8080/docs`.
 O frontend fica disponível em `http://localhost:5173`.
+
+## Testes da API
+
+Execute a suíte de integração dentro do backend:
+
+```bash
+docker compose exec app php artisan test
+```
+
+Os testes usam SQLite em memória e cobrem cadastro, login, autenticação, isolamento de projetos e o ciclo de vida de tarefas.
+
+### Testando pelo Postman
+
+1. Inicie o ambiente com `docker compose up -d --build`.
+2. Crie uma requisição `POST http://localhost:8080/api/register` com `Content-Type: application/json` e o corpo:
+
+```json
+{
+  "name": "Ana Silva",
+  "email": "ana@example.com",
+  "password": "Senha@123",
+  "password_confirmation": "Senha@123"
+}
+```
+3. Copie o valor `token` da resposta.
+4. Nas requisições protegidas, use `Authorization: Bearer <token>` e `Accept: application/json`.
+5. Teste `GET /api/me`, `GET /api/projects`, `POST /api/projects` e os endpoints de tarefas descritos no Swagger.
+
+Também é possível autenticar via `POST /api/login` usando `email` e `password`.
+
+### Acessando o Swagger UI
+
+Com o backend em execução, abra `http://localhost:8080/docs` no navegador. A tela permite consultar os endpoints, visualizar os schemas e usar **Authorize** para informar `Bearer <token>` e executar requisições autenticadas. A especificação bruta está em `http://localhost:8080/docs/openapi.yaml`.
 
 ## Convenções do backend
 
@@ -32,6 +65,7 @@ Seguindo `.github/copilot-instructions.md`:
 - **Form Requests** (`app/Http/Requests`): validação de entrada, nunca feita direto no controller.
 - **Policies/Gates** (`app/Policies`): autorização de ações sobre os models.
 - Rotas de API ficam em `backend/routes/api.php`.
+- A especificação OpenAPI fica em [`backend/docs/openapi.yaml`](backend/docs/openapi.yaml) e é servida também em `GET /docs/openapi.yaml`.
 
 ## Convenções do frontend
 

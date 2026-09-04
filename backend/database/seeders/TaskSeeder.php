@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Project;
 use App\Models\Tag;
 use App\Models\Task;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class TaskSeeder extends Seeder
@@ -21,14 +20,11 @@ class TaskSeeder extends Seeder
     public function run(): void
     {
         $tagIds = Tag::pluck('id');
-        $userIds = User::pluck('id');
-
-        Project::all()->each(function (Project $project) use ($tagIds, $userIds) {
+        Project::all()->each(function (Project $project) use ($tagIds) {
             Task::factory()
                 ->count(fake()->numberBetween(5, 20))
                 ->state(fn () => [
                     'project_id' => $project->id,
-                    'user_id' => fake()->boolean(70) ? $userIds->random() : null,
                 ])
                 ->create()
                 ->each(function (Task $task) use ($tagIds) {

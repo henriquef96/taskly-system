@@ -1,0 +1,342 @@
+openapi: 3.0.3
+info:
+  title: Taskly API
+  version: 1.0.0
+  description: REST API for authentication, projects, tasks, tags and attachments.
+servers:
+  - url: http://localhost:8080
+    description: Local Docker environment
+tags:
+  - name: Authentication
+  - name: Projects
+  - name: Tasks
+  - name: Attachments
+paths:
+  /api/register:
+    post:
+      tags: [Authentication]
+      summary: Register a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RegisterRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/AuthResponse'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LoginRequest'}
+      responses:
+        '200': {$ref: '#/components/responses/AuthResponse'}
+        '401': {description: Invalid credentials}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/me:
+    get:
+      tags: [Authentication]
+      security: [{sanctum: []}]
+      summary: Get the authenticated user
+      responses:
+        '200':
+          description: Authenticated user
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/UserResponse'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /api/logout:
+    post:
+      tags: [Authentication]
+      security: [{sanctum: []}]
+      summary: Revoke the current token
+      responses:
+        '200': {description: Token revoked}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /api/projects:
+    get:
+      tags: [Projects]
+      security: [{sanctum: []}]
+      summary: List the authenticated user's projects
+      responses:
+        '200':
+          description: Project collection
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProjectCollection'}
+    post:
+      tags: [Projects]
+      security: [{sanctum: []}]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProjectRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/ProjectResponse'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/projects/{project}:
+    parameters:
+      - {$ref: '#/components/parameters/ProjectId'}
+    get:
+      tags: [Projects]
+      security: [{sanctum: []}]
+      summary: Get a project
+      responses:
+        '200': {$ref: '#/components/responses/ProjectResponse'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Projects]
+      security: [{sanctum: []}]
+      summary: Update a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProjectRequest'}
+      responses:
+        '200': {$ref: '#/components/responses/ProjectResponse'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+    delete:
+      tags: [Projects]
+      security: [{sanctum: []}]
+      summary: Delete a project and its tasks
+      responses:
+        '204': {description: Project deleted}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /api/projects/{project}/tasks:
+    parameters:
+      - {$ref: '#/components/parameters/ProjectId'}
+    get:
+      tags: [Tasks]
+      security: [{sanctum: []}]
+      summary: List project tasks
+      responses:
+        '200':
+          description: Task collection
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TaskCollection'}
+    post:
+      tags: [Tasks]
+      security: [{sanctum: []}]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/TaskRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/TaskResponse'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/projects/{project}/tasks/{task}:
+    parameters:
+      - {$ref: '#/components/parameters/ProjectId'}
+      - {$ref: '#/components/parameters/TaskId'}
+    get:
+      tags: [Tasks]
+      security: [{sanctum: []}]
+      summary: Get a task
+      responses:
+        '200': {$ref: '#/components/responses/TaskResponse'}
+    patch:
+      tags: [Tasks]
+      security: [{sanctum: []}]
+      summary: Update a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/TaskRequest'}
+      responses:
+        '200': {$ref: '#/components/responses/TaskResponse'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+    delete:
+      tags: [Tasks]
+      security: [{sanctum: []}]
+      summary: Delete a task
+      responses:
+        '204': {description: Task deleted}
+  /api/tasks/{task}/status:
+    parameters:
+      - {$ref: '#/components/parameters/TaskId'}
+    patch:
+      tags: [Tasks]
+      security: [{sanctum: []}]
+      summary: Change task status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: {$ref: '#/components/schemas/TaskStatus'}
+      responses:
+        '200': {$ref: '#/components/responses/TaskResponse'}
+  /api/tasks/{task}/attachments:
+    parameters:
+      - {$ref: '#/components/parameters/TaskId'}
+    post:
+      tags: [Attachments]
+      security: [{sanctum: []}]
+      summary: Upload a task attachment
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: {type: string, format: binary}
+      responses:
+        '201':
+          description: Attachment uploaded
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AttachmentResponse'}
+  /api/attachments/{attachment}:
+    parameters:
+      - name: attachment
+        in: path
+        required: true
+        schema: {type: integer}
+    delete:
+      tags: [Attachments]
+      security: [{sanctum: []}]
+      summary: Delete an attachment
+      responses:
+        '204': {description: Attachment deleted}
+components:
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+  parameters:
+    ProjectId:
+      name: project
+      in: path
+      required: true
+      schema: {type: integer}
+    TaskId:
+      name: task
+      in: path
+      required: true
+      schema: {type: integer}
+  schemas:
+    User:
+      type: object
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        email: {type: string, format: email}
+    RegisterRequest:
+      type: object
+      required: [name, email, password, password_confirmation]
+      properties:
+        name: {type: string, maxLength: 255}
+        email: {type: string, format: email}
+        password: {type: string, format: password, minLength: 8}
+        password_confirmation: {type: string, format: password}
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: {type: string, format: email}
+        password: {type: string, format: password}
+    ProjectRequest:
+      type: object
+      properties:
+        name: {type: string, maxLength: 255}
+        description: {type: string, nullable: true}
+        status: {type: string, enum: [active, completed, archived]}
+    Project:
+      allOf:
+        - {$ref: '#/components/schemas/ProjectRequest'}
+        - type: object
+          properties:
+            id: {type: integer}
+            user_id: {type: integer}
+            created_at: {type: string, format: date-time}
+            updated_at: {type: string, format: date-time}
+    TaskStatus:
+      type: string
+      enum: [pending, in_progress, completed, cancelled]
+    TaskRequest:
+      type: object
+      properties:
+        title: {type: string, maxLength: 255}
+        short_description: {type: string, maxLength: 255}
+        full_description: {type: string, nullable: true}
+        due_date: {type: string, format: date-time, nullable: true}
+        status: {$ref: '#/components/schemas/TaskStatus'}
+        position: {type: integer, minimum: 0}
+        tags:
+          type: array
+          items: {type: integer}
+    Task:
+      allOf:
+        - {$ref: '#/components/schemas/TaskRequest'}
+        - type: object
+          properties:
+            id: {type: integer}
+            project_id: {type: integer}
+            created_at: {type: string, format: date-time}
+            updated_at: {type: string, format: date-time}
+    Attachment:
+      type: object
+      properties:
+        id: {type: integer}
+        task_id: {type: integer}
+        file_path: {type: string}
+        file_name: {type: string}
+        mime_type: {type: string}
+        file_size: {type: integer}
+    AuthResponse:
+      type: object
+      properties:
+        user: {$ref: '#/components/schemas/User'}
+        token: {type: string}
+    UserResponse:
+      type: object
+      properties: {user: {$ref: '#/components/schemas/User'}}
+    ProjectCollection:
+      type: object
+      properties:
+        data: {type: array, items: {$ref: '#/components/schemas/Project'}}
+    TaskCollection:
+      type: object
+      properties:
+        data: {type: array, items: {$ref: '#/components/schemas/Task'}}
+    AttachmentResponse:
+      type: object
+      properties: {data: {$ref: '#/components/schemas/Attachment'}}
+  responses:
+    AuthResponse:
+      description: Authentication successful
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/AuthResponse'}
+    ProjectResponse:
+      description: Project
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Project'}
+    TaskResponse:
+      description: Task
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Task'}
+    ValidationError: {description: Validation error}
+    Unauthorized: {description: Authentication required}
+    Forbidden: {description: Access denied}
+    NotFound: {description: Resource not found}
