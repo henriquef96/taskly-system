@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import { TagSelector } from '@/components/tasks/TagSelector'
 import type { Task, TaskInput, TaskStatus } from '@/types/api'
 import { TASK_STATUS_VALUES, getTaskStatusLabel } from '@/types/api'
+import type { Tag } from '@/types/tags'
 
 interface TaskFormProps {
   task?: Task
@@ -9,6 +11,8 @@ interface TaskFormProps {
   serverError?: string
   onSubmit: (input: TaskInput) => void
   onCancel: () => void
+  availableTags: Tag[]
+  serverErrors?: Record<string, string[]>
 }
 
 interface TaskFormValues {
@@ -18,13 +22,13 @@ interface TaskFormValues {
   due_date: string
   status: TaskStatus
   position: number
-  tags: string
+  tags: number[]
 }
 
 const toDateInput = (value: string | null | undefined) => value ? value.slice(0, 16) : ''
 
-export function TaskForm({ task, isSubmitting, serverError, onSubmit, onCancel }: TaskFormProps) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskFormValues>({
+export function TaskForm({ task, isSubmitting, serverError, serverErrors = {}, onSubmit, onCancel, availableTags }: TaskFormProps) {
+  const { register, control, handleSubmit, reset, formState: { errors } } = useForm<TaskFormValues>({
     defaultValues: {
       title: task?.title ?? '',
       short_description: task?.short_description ?? '',
@@ -32,7 +36,7 @@ export function TaskForm({ task, isSubmitting, serverError, onSubmit, onCancel }
       due_date: toDateInput(task?.due_date),
       status: task?.status ?? 'pending',
       position: task?.position ?? 0,
-      tags: task?.tags.map((tag) => String(tag.id)).join(', ') ?? '',
+      tags: task?.tags.map((tag) => tag.id) ?? [],
     },
   })
 
@@ -44,12 +48,11 @@ export function TaskForm({ task, isSubmitting, serverError, onSubmit, onCancel }
       due_date: toDateInput(task?.due_date),
       status: task?.status ?? 'pending',
       position: task?.position ?? 0,
-      tags: task?.tags.map((tag) => String(tag.id)).join(', ') ?? '',
+      tags: task?.tags.map((tag) => tag.id) ?? [],
     })
   }, [reset, task])
 
   const submit = (values: TaskFormValues) => {
-    const tags = values.tags.split(',').map((value) => Number(value.trim())).filter((value) => Number.isInteger(value) && value > 0)
     onSubmit({
       title: values.title.trim(),
       short_description: values.short_description.trim(),
@@ -57,7 +60,7 @@ export function TaskForm({ task, isSubmitting, serverError, onSubmit, onCancel }
       due_date: values.due_date ? new Date(values.due_date).toISOString() : null,
       status: values.status,
       position: Number(values.position),
-      tags,
+      tags: values.tags,
     })
   }
 
@@ -89,9 +92,19 @@ export function TaskForm({ task, isSubmitting, serverError, onSubmit, onCancel }
           <input type="number" min="0" {...register('position', { valueAsNumber: true, min: 0 })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal" />
         </label>
       </div>
-      <label className="block text-sm font-medium text-slate-700">Tags
-        <input {...register('tags')} placeholder="IDs separados por vírgula (ex.: 1, 2)" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500" />
-      </label>
+      <Controller
+        name="tags"
+        control={control}
+        render={({ field }) => (
+          <TagSelector
+            availableTags={availableTags}
+            selectedTagIds={field.value}
+            onChange={field.onChange}
+            disabled={isSubmitting}
+          />
+        )}
+      />
+      {serverErrors.tags?.map((message) => <p key={message} className="text-xs text-red-600">{message}</p>)}
       {serverError && <p className="text-sm text-red-600" role="alert">{serverError}</p>}
       <div className="flex justify-end gap-3">
         <button type="button" onClick={onCancel} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">Cancelar</button>

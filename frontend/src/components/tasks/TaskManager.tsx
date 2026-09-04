@@ -7,6 +7,7 @@ import { TaskForm } from '@/components/tasks/TaskForm'
 import { useCreateTask, useDeleteTask, useProjectTasks, useUpdateTask, useUpdateTaskStatus } from '@/hooks/useProjects'
 import type { Task, TaskInput } from '@/types/api'
 import { isTaskStatus, TASK_STATUS_VALUES, getTaskStatusLabel } from '@/types/api'
+import type { Tag } from '@/types/tags'
 
 interface TaskManagerProps { projectId: number }
 
@@ -35,6 +36,9 @@ export function TaskManager({ projectId }: TaskManagerProps) {
   }
 
   const tasks = [...(query.data?.data ?? [])].sort((a, b) => a.position - b.position)
+  const availableTags = Array.from(
+    new Map<number, Tag>(tasks.flatMap((task) => task.tags).map((tag) => [tag.id, tag])).values(),
+  ).sort((a, b) => a.name.localeCompare(b.name))
   const mutationError = createTask.error ?? updateTask.error
   const actionError = mutationError ?? updateStatus.error ?? deleteTask.error
 
@@ -45,7 +49,7 @@ export function TaskManager({ projectId }: TaskManagerProps) {
         <button type="button" onClick={() => { setIsCreating((value) => !value); setEditingTask(undefined) }} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">{isCreating ? 'Fechar formulário' : 'Nova tarefa'}</button>
       </div>
       {actionError instanceof ApiError && <p className="text-sm text-red-600" role="alert">{actionError.message}</p>}
-      {(isCreating || editingTask) && <TaskForm task={editingTask} isSubmitting={createTask.isPending || updateTask.isPending} serverError={mutationError instanceof ApiError ? mutationError.message : undefined} onSubmit={submit} onCancel={() => { setIsCreating(false); setEditingTask(undefined) }} />}
+      {(isCreating || editingTask) && <TaskForm task={editingTask} availableTags={availableTags} isSubmitting={createTask.isPending || updateTask.isPending} serverError={mutationError instanceof ApiError ? mutationError.message : undefined} serverErrors={mutationError instanceof ApiError ? mutationError.errors : undefined} onSubmit={submit} onCancel={() => { setIsCreating(false); setEditingTask(undefined) }} />}
       {query.isLoading && <LoadingState label="Carregando tarefas..." />}
       {query.error && <ErrorState title="Não foi possível carregar as tarefas" message={query.error instanceof ApiError ? query.error.message : 'Tente novamente em alguns instantes.'} />}
       {!query.isLoading && !query.error && tasks.length === 0 && <EmptyState title="Nenhuma tarefa por aqui" message="Crie a primeira tarefa deste projeto." />}

@@ -1,3 +1,7 @@
+import type { Tag } from '@/types/tags'
+
+export type { Tag }
+
 export interface User {
   id: number
   name: string
@@ -42,12 +46,6 @@ export interface Attachment {
   file_name: string
   mime_type: string
   file_size: number
-}
-
-export interface Tag {
-  id: number
-  name: string
-  color: string
 }
 
 export interface Task {
