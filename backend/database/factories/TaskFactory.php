@@ -2,11 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Project;
 use App\Models\Task;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,12 +21,12 @@ class TaskFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
-            'user_id' => fake()->boolean(70) ? User::factory() : null,
             'title' => ucfirst(fake()->sentence(rand(3, 6))),
-            'description' => fake()->boolean(70) ? fake()->paragraph() : null,
+            'short_description' => fake()->sentence(),
+            'full_description' => fake()->boolean(70) ? fake()->paragraph() : null,
             'status' => fake()->randomElement(TaskStatus::cases()),
-            'priority' => fake()->randomElement(TaskPriority::cases()),
             'due_date' => fake()->boolean(60) ? fake()->dateTimeBetween('-1 month', '+2 months') : null,
+            'position' => fake()->numberBetween(0, 20),
         ];
     }
 
@@ -49,16 +47,6 @@ class TaskFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => TaskStatus::Completed,
-        ]);
-    }
-
-    /**
-     * Indicate that the task has no assignee.
-     */
-    public function unassigned(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'user_id' => null,
         ]);
     }
 }

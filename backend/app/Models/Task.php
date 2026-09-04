@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['project_id', 'user_id', 'title', 'description', 'status', 'priority', 'due_date'])]
+#[Fillable(['project_id', 'title', 'short_description', 'full_description', 'due_date', 'status', 'position'])]
 class Task extends Model
 {
     /** @use HasFactory<TaskFactory> */
@@ -27,7 +27,7 @@ class Task extends Model
         return [
             'status' => TaskStatus::class,
             'priority' => TaskPriority::class,
-            'due_date' => 'date',
+            'due_date' => 'datetime',
         ];
     }
 

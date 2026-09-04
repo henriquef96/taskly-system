@@ -32,17 +32,13 @@ class User extends Authenticatable
         ];
     }
 
-<<<<<<< HEAD
     /**
      * The projects owned by the user.
      */
-=======
->>>>>>> agents/implement-projectcontroller-with-sanctum
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
     }
-<<<<<<< HEAD
 
     /**
      * The tasks assigned to the user.
@@ -51,6 +47,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Task::class);
     }
-=======
->>>>>>> agents/implement-projectcontroller-with-sanctum
 }
