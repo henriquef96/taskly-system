@@ -31,8 +31,19 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * The projects owned by the user.
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    /**
+     * The tasks assigned to the user.
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 }

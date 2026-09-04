@@ -2,19 +2,43 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStatus;
+use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'description'])]
+#[Fillable(['name', 'description', 'status', 'user_id'])]
 class Project extends Model
 {
-    public function user(): BelongsTo
+    /** @use HasFactory<ProjectFactory> */
+    use HasFactory;
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        return $this->belongsTo(User::class);
+        return [
+            'status' => ProjectStatus::class,
+        ];
     }
 
+    /**
+     * The user who owns the project.
+     */
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * The tasks that belong to the project.
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
