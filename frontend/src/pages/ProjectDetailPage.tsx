@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ApiError } from '@/api/ApiError'
 import { ProjectForm } from '@/components/projects/ProjectForm'
+import { TaskManager } from '@/components/tasks/TaskManager'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout'
@@ -45,6 +46,7 @@ export function ProjectDetailPage() {
           onSubmit={handleUpdate}
         />
       )}
+      {project && <TaskManager projectId={project.id} />}
     </AuthenticatedLayout>
   )
 }

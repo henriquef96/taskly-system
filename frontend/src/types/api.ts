@@ -44,6 +44,12 @@ export interface Attachment {
   file_size: number
 }
 
+export interface Tag {
+  id: number
+  name: string
+  color: string
+}
+
 export interface Task {
   id: number
   project_id: number
@@ -53,6 +59,7 @@ export interface Task {
   due_date: string | null
   status: TaskStatus
   position: number
+  tags: Tag[]
   created_at: string
   updated_at: string
 }

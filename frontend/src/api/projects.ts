@@ -31,13 +31,13 @@ export async function listTasks(projectId: number): Promise<Collection<Task>> {
 }
 
 export async function createTask(projectId: number, input: TaskInput): Promise<Task> {
-  const { data } = await httpClient.post<Task>(`/projects/${projectId}/tasks`, input)
-  return data
+  const { data } = await httpClient.post<DataEnvelope<Task>>(`/projects/${projectId}/tasks`, input)
+  return data.data
 }
 
 export async function updateTask(projectId: number, taskId: number, input: TaskInput): Promise<Task> {
-  const { data } = await httpClient.patch<Task>(`/projects/${projectId}/tasks/${taskId}`, input)
-  return data
+  const { data } = await httpClient.patch<DataEnvelope<Task>>(`/projects/${projectId}/tasks/${taskId}`, input)
+  return data.data
 }
 
 export async function deleteTask(projectId: number, taskId: number): Promise<void> {
@@ -45,6 +45,6 @@ export async function deleteTask(projectId: number, taskId: number): Promise<voi
 }
 
 export async function updateTaskStatus(taskId: number, status: Task['status']): Promise<Task> {
-  const { data } = await httpClient.patch<Task>(`/tasks/${taskId}/status`, { status })
-  return data
+  const { data } = await httpClient.patch<DataEnvelope<Task>>(`/tasks/${taskId}/status`, { status })
+  return data.data
 }

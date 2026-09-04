@@ -46,13 +46,34 @@ export function useDeleteProject() {
 }
 
 export function useProjectTasks(projectId: number) {
-  return useQuery({ queryKey: ['projects', projectId, 'tasks'], queryFn: () => projectsApi.listTasks(projectId) })
+  return useQuery({
+    queryKey: ['projects', projectId, 'tasks'],
+    queryFn: () => projectsApi.listTasks(projectId),
+    enabled: Number.isInteger(projectId) && projectId > 0,
+  })
 }
 
 export function useCreateTask(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: TaskInput) => projectsApi.createTask(projectId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+  })
+}
+
+export function useUpdateTask(projectId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ taskId, input }: { taskId: number; input: TaskInput }) =>
+      projectsApi.updateTask(projectId, taskId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+  })
+}
+
+export function useDeleteTask(projectId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (taskId: number) => projectsApi.deleteTask(projectId, taskId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
   })
 }
