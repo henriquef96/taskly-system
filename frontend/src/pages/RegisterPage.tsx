@@ -1,20 +1,17 @@
-import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
+import { Link, useNavigate } from 'react-router-dom'
+import { ApiError } from '@/api/ApiError'
+import { useRegister } from '@/hooks/useAuth'
 import { registerSchema, type RegisterFormValues } from '@/types/forms'
 
 export function RegisterPage() {
   const navigate = useNavigate()
-  const { register: registerUser } = useAuth()
+  const registerUser = useRegister()
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({ resolver: zodResolver(registerSchema) })
-  const [error, setError] = useState('')
 
-  async function onSubmit(form: RegisterFormValues) {
-    setError('')
-    try { await registerUser(form); navigate('/dashboard') }
-    catch { setError('Não foi possível criar sua conta.') }
+  function onSubmit(form: RegisterFormValues) {
+    registerUser.mutate(form, { onSuccess: () => navigate('/dashboard') })
   }
 
   return (
@@ -29,8 +26,15 @@ export function RegisterPage() {
         {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
         <input type="password" placeholder="Confirme a senha" {...register('password_confirmation')} className="w-full rounded border p-3" />
         {errors.password_confirmation && <p className="text-sm text-red-600">{errors.password_confirmation.message}</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button className="w-full rounded bg-blue-600 p-3 font-medium text-white">Criar conta</button>
+        {registerUser.error && <p role="alert" className="text-sm text-red-600">
+          {registerUser.error instanceof ApiError ? registerUser.error.message : 'Não foi possível criar sua conta. Tente novamente.'}
+        </p>}
+        <button type="submit" disabled={registerUser.isPending} className="w-full rounded bg-blue-600 p-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-60">
+          {registerUser.isPending ? 'Criando conta...' : 'Criar conta'}
+        </button>
+        <p className="text-center text-sm text-neutral-600">
+          Já tem uma conta? <Link to="/login" className="text-blue-600 hover:underline">Entrar</Link>
+        </p>
       </form>
     </main>
   )

@@ -1,5 +1,6 @@
 import axios, { isAxiosError } from 'axios'
 import { ApiError, isApiErrorPayload } from '@/api/ApiError'
+import { getAuthToken } from '@/auth/tokenStorage'
 import { env } from '@/config/env'
 
 /**
@@ -12,7 +13,7 @@ export const httpClient = axios.create({
 })
 
 httpClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('taskly_token')
+  const token = getAuthToken()
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })

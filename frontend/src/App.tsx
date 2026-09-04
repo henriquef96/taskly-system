@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -11,11 +12,17 @@ function ProtectedRoute() {
   return user ? <DashboardPage /> : <Navigate to="/login" replace />
 }
 
+function PublicRoute({ children }: { children: ReactNode }) {
+  const { user, isLoading } = useAuth()
+  if (isLoading) return <p className="p-8">Carregando...</p>
+  return user ? <Navigate to="/dashboard" replace /> : children
+}
+
 function App() {
   return <Routes>
     <Route path="/" element={<HomePage />} />
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/register" element={<RegisterPage />} />
+    <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+    <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
     <Route path="/dashboard" element={<ProtectedRoute />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>

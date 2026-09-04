@@ -1,52 +1,70 @@
-import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useContext } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as authApi from '@/api/auth'
+import { AuthContext } from '@/auth/AuthContext'
+import { ApiError } from '@/api/ApiError'
+import { clearAuthToken, getAuthToken, setAuthToken } from '@/auth/tokenStorage'
 import type { User } from '@/types/api'
-import type { AuthContextValue, LoginInput, RegisterInput } from '@/types/auth'
+import type { LoginInput, RegisterInput } from '@/types/auth'
 
-const AuthContext = createContext<AuthContextValue | null>(null)
+export const currentUserQueryKey = ['auth', 'current-user'] as const
 
-export function AuthProvider({ children }: PropsWithChildren) {
-  const queryClient = useQueryClient()
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    if (!localStorage.getItem('taskly_token')) {
-      setIsLoading(false)
-      return
-    }
-    authApi.getCurrentUser()
-      .then(({ user: currentUser }) => setUser(currentUser))
-      .catch(() => localStorage.removeItem('taskly_token'))
-      .finally(() => setIsLoading(false))
-  }, [])
-
-  const value = useMemo<AuthContextValue>(() => ({
-    user,
-    isLoading,
-    async login(input: LoginInput) {
-      const response = await authApi.login(input)
-      localStorage.setItem('taskly_token', response.token)
-      setUser(response.user)
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: currentUserQueryKey,
+    queryFn: async (): Promise<User> => {
+      try {
+        const response = await authApi.getCurrentUser()
+        return response.user
+      } catch (error: unknown) {
+        if (error instanceof ApiError && error.status === 401) {
+          clearAuthToken()
+        }
+        throw error
+      }
     },
-    async register(input: RegisterInput) {
-      const response = await authApi.register(input)
-      localStorage.setItem('taskly_token', response.token)
-      setUser(response.user)
-    },
-    async logout() {
-      await authApi.logout()
-      localStorage.removeItem('taskly_token')
-      setUser(null)
-      queryClient.clear()
-    },
-  }), [isLoading, queryClient, user])
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    enabled: getAuthToken() !== null,
+    retry: false,
+  })
 }
 
-export function useAuth(): AuthContextValue {
+export function useLogin() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: LoginInput) => authApi.login(input),
+    onSuccess: (response) => {
+      setAuthToken(response.token)
+      queryClient.setQueryData(currentUserQueryKey, response.user)
+    },
+  })
+}
+
+export function useRegister() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: RegisterInput) => authApi.register(input),
+    onSuccess: (response) => {
+      setAuthToken(response.token)
+      queryClient.setQueryData(currentUserQueryKey, response.user)
+    },
+  })
+}
+
+export function useLogout() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: authApi.logout,
+    onSettled: () => {
+      clearAuthToken()
+      queryClient.clear()
+    },
+  })
+}
+
+export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) throw new Error('useAuth deve ser usado dentro de AuthProvider')
   return context
