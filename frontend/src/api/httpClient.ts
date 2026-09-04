@@ -1,29 +1,17 @@
 import { env } from '@/config/env'
-import { ApiError } from '@/api/ApiError'
+import axios from 'axios'
 
 /**
- * Cliente HTTP central para consumo da API REST do backend Laravel.
- * Único ponto de acesso à rede: nenhuma outra parte do frontend deve
- * chamar `fetch` diretamente, garantindo que toda a comunicação
- * com o backend passe por aqui (base URL, headers e tratamento de erro).
+ * Cliente HTTP único da aplicação. O token é lido apenas no momento da
+ * requisição para evitar estado duplicado entre autenticação e transporte.
  */
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${env.apiUrl}${path}`, {
-    ...init,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      ...init?.headers,
-    },
-  })
+export const httpClient = axios.create({
+  baseURL: env.apiUrl,
+  headers: { Accept: 'application/json' },
+})
 
-  if (!response.ok) {
-    throw new ApiError(`Falha ao acessar ${path}`, response.status)
-  }
-
-  return (await response.json()) as T
-}
-
-export const httpClient = {
-  get: <T>(path: string) => request<T>(path, { method: 'GET' }),
-}
+httpClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('taskly_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})

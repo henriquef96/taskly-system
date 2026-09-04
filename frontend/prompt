@@ -1,0 +1,175 @@
+Instruções de promp para o Agente do GitHub Copilot, ultilizando a LLM Claude Sonnet 5.
+
+Prompt 2.0 Frontend:
+Implementar base do frontend seguindo as instruções (Regras e Princípios do Código e Processo de Trabalho do GitHub Copilot) do arquivo copilot-instructions.md.
+
+Prompt 2.1: Analisar e preparar a arquitetura
+Analise o frontend existente em frontend/ e a especificação da API em backend/docs/openapi.yaml.
+Antes de alterar qualquer arquivo:
+1. Explique brevemente a arquitetura proposta.
+2. Identifique o que já existe e deve ser preservado.
+3. Liste os pacotes necessários para React Router, Axios, TanStack Query e validação de formulários.
+4. Não implemente ainda.
+A solução deve respeitar integralmente .github/copilot-instructions.md, especialmente:
+- TypeScript estrito;
+- proibição de any;
+- tipos em src/types;
+- chamadas de API em src/api;
+- custom hooks em src/hooks;
+- consumo exclusivamente via API REST.
+
+Prompt 2.2: Configurar a fundação do frontend
+Implemente a fundação do frontend Taskly.
+Inclua:
+- instalação e configuração de Axios;
+- instalação e configuração do TanStack Query v5;
+- configuração do React Router;
+- cliente HTTP central em src/api;
+- leitura da URL da API por src/config/env.ts;
+- tratamento tipado de erros da API;
+- configuração global do QueryClient;
+- preservação da verificação de saúde da API.
+Não use fetch diretamente fora do cliente HTTP. Não use any.
+Ao final:
+- execute npm run build;
+- execute npm run lint;
+- informe os arquivos alterados e eventuais problemas.
+
+Prompt 2.3: Criar os tipos da API
+Crie os tipos TypeScript do domínio em frontend/src/types/, baseando-se exclusivamente em backend/docs/openapi.yaml e nas rotas reais de backend/routes/api.php.
+Crie tipos para:
+- User;
+- autenticação;
+- Project;
+- Task;
+- TaskStatus;
+- Attachment;
+- respostas paginadas ou envelopadas em data;
+- erros de validação.
+Inclua labels e helpers tipados para os status das tarefas:
+- pending: Não iniciada;
+- in_progress: Em andamento;
+- completed: Concluída;
+- cancelled: Cancelada.
+Não use any, casts desnecessários ou tipos genéricos sem necessidade. Execute build e lint ao final.
+
+Prompt 2.4: Implementar autenticação
+Implemente o fluxo completo de autenticação no frontend.
+Inclua:
+- páginas de login e cadastro;
+- hooks useLogin, useRegister, useCurrentUser e useLogout;
+- chamadas para /api/login, /api/register, /api/me e /api/logout;
+- armazenamento seguro do token conforme o modelo atual da API;
+- redirecionamento de usuários autenticados e não autenticados;
+- estados de loading, erro e validação;
+- logout com invalidação das queries do TanStack Query.
+Não exponha credenciais no código. Não use any. Reutilize o cliente HTTP central e os tipos de src/types.
+Adicione rotas públicas e privadas com React Router. Valide com npm run build e npm run lint.
+
+Prompt 2.5: Criar o layout principal da aplicação
+Crie o layout autenticado do Taskly.
+Inclua componentes reutilizáveis para:
+- sidebar ou navegação principal;
+- cabeçalho;
+- nome e e-mail do usuário;
+- botão de logout;
+- área principal responsiva;
+- estados de carregamento;
+- mensagens de erro;
+- estado vazio.
+Use componentes com responsabilidade única e Tailwind CSS. Não implemente regras de negócio dentro dos componentes visuais.
+Preserve a funcionalidade já existente de health check quando ela for relevante. Execute build e lint.
+
+Prompt 2.6: Implementar projetos
+Implemente o gerenciamento de projetos integrado à API.
+Inclua:
+- hooks useProjects, useProject, useCreateProject, useUpdateProject e useDeleteProject;
+- chamadas para /api/projects e /api/projects/{project};
+- listagem de projetos;
+- criação e edição em formulário;
+- exclusão com confirmação;
+- estados de loading, erro e vazio;
+- invalidação otimista ou consistente das queries após mutações;
+- navegação para o detalhe de um projeto.
+Use FormData somente se a API exigir; caso contrário, envie JSON. Use tipos explícitos e não use any. Execute build e lint.
+
+Prompt 2.7: Implementar tarefas
+Implemente o gerenciamento de tarefas dentro de um projeto.
+Inclua:
+- hooks para listar, criar, editar e excluir tarefas;
+- integração com:
+  - /api/projects/{project}/tasks;
+  - /api/projects/{project}/tasks/{task};
+  - /api/tasks/{task}/status;
+- formulário com título, descrição curta, descrição completa, prazo, status, posição e tags;
+- exibição visual por status;
+- alteração rápida de status;
+- ordenação por position;
+- estados de loading, erro e lista vazia.
+Centralize os labels dos status em um helper tipado. Não duplique regras entre componentes. Execute build e lint.
+
+Prompt 2.8: Implementar tags
+Analise a API e o backend para verificar quais endpoints de tags estão disponíveis.
+Se existirem endpoints:
+- crie os tipos em src/types;
+- crie as funções de API em src/api;
+- crie hooks em src/hooks;
+- permita selecionar tags no formulário de tarefas;
+- exiba as tags com suas cores;
+- trate corretamente validações e erros.
+Se os endpoints ainda não existirem, não invente rotas. Nesse caso, deixe o frontend preparado apenas com tipos e componentes desacoplados, documentando claramente a limitação.
+Não use any. Execute build e lint.
+
+Prompt 2.9: Implementar anexos
+Implemente os anexos de tarefas conforme backend/docs/openapi.yaml.
+Inclua:
+- upload multipart para /api/tasks/{task}/attachments;
+- exclusão em /api/attachments/{attachment};
+- input de arquivo com feedback de progresso ou carregamento;
+- listagem dos anexos da tarefa quando os dados estiverem disponíveis;
+- exibição de nome, tipo e tamanho;
+- tratamento de erros HTTP e validações;
+- atualização das queries após upload ou exclusão.
+Garanta que o cliente HTTP não force Content-Type application/json em requisições multipart. Use tipos explícitos e execute build e lint.
+
+Prompt 3.0: Dashboard e experiência final
+Crie o dashboard autenticado do Taskly.
+Inclua:
+- resumo de projetos;
+- contagem de tarefas por status;
+- tarefas próximas do vencimento;
+- projetos recentes;
+- estados de carregamento usando skeletons;
+- estados vazios;
+- tratamento visual de erros;
+- layout responsivo e acessível.
+Reutilize os hooks e componentes já existentes. Não faça chamadas HTTP diretamente nos componentes. Não crie dados mockados permanentes. Execute build e lint.
+
+Prompt 3.1: Qualidade, acessibilidade e consistência
+Faça uma revisão técnica completa do frontend implementado.
+Verifique:
+- ausência total de any;
+- ausência de chamadas fetch fora do cliente HTTP;
+- todas as chamadas de API encapsuladas em src/api;
+- todos os hooks de dados em src/hooks;
+- tipos centralizados em src/types;
+- tratamento de 401, 403, 404 e 422;
+- estados de loading, erro e vazio;
+- navegação por teclado;
+- labels e mensagens acessíveis;
+- responsividade;
+- ausência de duplicação relevante;
+- compatibilidade com a API documentada.
+Corrija somente problemas relacionados ao frontend Taskly. Execute npm run build e npm run lint e apresente um resumo objetivo das correções.
+
+Prompt 3.2: Testes do frontend
+Analise a configuração atual de testes do frontend.
+Se já existir um runner configurado, implemente testes para:
+- login bem-sucedido e inválido;
+- proteção de rotas;
+- listagem de projetos;
+- criação e exclusão de tarefas;
+- alteração de status;
+- estados de loading, erro e vazio.
+Use dados tipados, sem mocks irrelevantes e sem assertTrue(true). Não adicione uma nova ferramenta de testes sem justificar previamente.
+Execute os testes existentes, npm run build e npm run lint.

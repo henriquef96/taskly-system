@@ -1,7 +1,7 @@
 Instruções de promp para o Agente do GitHub Copilot, ultilizando a LLM Claude Sonnet 5.
 
 Prompt 1.0 Backend:
-Implementar base do backend seguindo as instruções (Princípios de Desenvolvimento, Regras, Processo de Trabalho do GitHub Copilot) do arquivo copilot-instructions.md.
+Implementar base do backend seguindo as instruções (Regras e Princípios do Código e Processo de Trabalho do GitHub Copilot) do arquivo copilot-instructions.md.
 
 Prompt 1.1: Migrations e Models
 Siga as instruções do copilot-instructions.md. Vamos iniciar a implementação do backend do Taskly. Antes de gerar ou alterar qualquer código, verifique a estrutura atual do projeto e me explique o passo a passo da implementação. Crie as migrations e models para os recursos Project, Task, Tag e TaskAttachment, além da tabela pivot task_tag. Garanta o uso das chaves estrangeiras com cascadeOnDelete, os tipos corretos de dados e os atributos $fillable / $casts nos models conforme especificado no arquivo de instruções.
@@ -30,15 +30,12 @@ Crie a TaskPolicy verificando se a tarefa pertence ao projeto do usuário autent
 Crie StoreTaskRequest e UpdateTaskRequest validando campos como title, short_description, due_date, status (enum/string: pending, in_progress, completed, cancelled) e vínculo com tags.
 Crie o TaskResource formatando as datas e exibindo os labels de status correspondentes ("Não iniciada", "Em andamento", etc.).
 
-Prompt 1.8 — TaskController (CRUD, Filtros e Atualização de Status)
+Prompt 1.8: TaskController (CRUD, Filtros e Atualização de Status)
 Implemente o TaskController sob o escopo do projeto ativo (/api/projects/{project}/tasks).
 Garanta que os controllers fiquem simples utilizando um TaskService para lidar com a persistência e atribuição de tags. Inclua o endpoint específico PATCH /api/tasks/{task}/status para alteração rápida de status, necessário para a visão Kanban do frontend.
 
-Prompt 1.9 — Upload e Gestão de Anexos
+Prompt 1.9: Upload e Gestão de Anexos
 Conforme o Passo 5 das instruções, implemente os endpoints de upload e exclusão de anexos de tarefas:
 POST /api/tasks/{task}/attachments
 DELETE /api/attachments/{attachment}
 Valide tamanhos e tipos de arquivos usando UploadAttachmentRequest. Trate o armazenamento com a fachada Storage do Laravel e salve os metadados na tabela task_attachments.
-
-Prompt 2.0 - Testes unitarios, revisão final do backend, Swagger
-Siga as boas práticas do arquivo copilot-instructions.md, faça uma revisão final do backend, me explicando as implementações adotadas, adicionar testes para cadastro, login, autenticação, isolamento de projetos e o ciclo de vida de tarefas, por fim documente a API em uma inerface Swagger UI, e atualize o README do projeto.

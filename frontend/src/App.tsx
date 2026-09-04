@@ -1,7 +1,24 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { HomePage } from '@/pages/HomePage'
+import { LoginPage } from '@/pages/LoginPage'
+import { RegisterPage } from '@/pages/RegisterPage'
+
+function ProtectedRoute() {
+  const { user, isLoading } = useAuth()
+  if (isLoading) return <p className="p-8">Carregando...</p>
+  return user ? <DashboardPage /> : <Navigate to="/login" replace />
+}
 
 function App() {
-  return <HomePage />
+  return <Routes>
+    <Route path="/" element={<HomePage />} />
+    <Route path="/login" element={<LoginPage />} />
+    <Route path="/register" element={<RegisterPage />} />
+    <Route path="/dashboard" element={<ProtectedRoute />} />
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Routes>
 }
 
 export default App
