@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Http\Resources\ProjectResource;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\ProjectService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 class ProjectController extends Controller
@@ -17,52 +19,51 @@ class ProjectController extends Controller
         private readonly ProjectService $projectService,
     ) {}
 
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
         $user = $this->authenticatedUser();
         Gate::authorize('viewAny', Project::class);
 
-        return response()->json($this->projectService->listForUser($user));
+        return ProjectResource::collection($this->projectService->listForUser($user));
     }
 
-    public function store(StoreProjectRequest $request): JsonResponse
+    public function store(StoreProjectRequest $request): ProjectResource
     {
         $user = $this->authenticatedUser();
         Gate::authorize('create', Project::class);
 
-        return response()->json(
+        return new ProjectResource(
             $this->projectService->create($user, $request->validated()),
-            201,
         );
     }
 
-    public function show(Project $project): JsonResponse
+    public function show(Project $project): ProjectResource
     {
         Gate::authorize('view', $project);
 
-        return response()->json($project);
+        return new ProjectResource($project);
     }
 
-    public function update(UpdateProjectRequest $request, Project $project): JsonResponse
+    public function update(UpdateProjectRequest $request, Project $project): ProjectResource
     {
         Gate::authorize('update', $project);
 
-        return response()->json(
+        return new ProjectResource(
             $this->projectService->update($project, $request->validated()),
         );
     }
 
-    public function destroy(Project $project): JsonResponse
+    public function destroy(Project $project): Response
     {
         Gate::authorize('delete', $project);
         $this->projectService->delete($project);
 
-        return response()->json(status: 204);
+        return response()->noContent();
     }
 
     private function authenticatedUser(): User
     {
-        $user = auth()->user();
+        $user = request()->user();
 
         abort_unless($user instanceof User, 401);
 

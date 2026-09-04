@@ -8,7 +8,7 @@ class StoreProjectRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check();
+        return $this->user() !== null;
     }
 
     public function rules(): array
@@ -16,6 +16,7 @@ class StoreProjectRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'status' => ['sometimes', 'string', 'in:active,completed,archived'],
         ];
     }
 }

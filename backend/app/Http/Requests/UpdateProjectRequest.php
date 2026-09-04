@@ -8,7 +8,7 @@ class UpdateProjectRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check();
+        return $this->user() !== null;
     }
 
     public function rules(): array
@@ -16,6 +16,7 @@ class UpdateProjectRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
+            'status' => ['sometimes', 'string', 'in:active,completed,archived'],
         ];
     }
 }
