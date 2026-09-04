@@ -290,6 +290,9 @@ components:
           properties:
             id: {type: integer}
             project_id: {type: integer}
+            attachments:
+              type: array
+              items: {$ref: '#/components/schemas/Attachment'}
             created_at: {type: string, format: date-time}
             updated_at: {type: string, format: date-time}
     Attachment:

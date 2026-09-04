@@ -45,7 +45,7 @@ class TaskController extends Controller
     {
         Gate::authorize('view', $task);
 
-        return new TaskResource($task->load('tags'));
+        return new TaskResource($task->load(['tags', 'attachments']));
     }
 
     public function update(UpdateTaskRequest $request, Project $project, Task $task): TaskResource

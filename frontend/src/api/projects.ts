@@ -1,5 +1,5 @@
 import { httpClient } from '@/api/httpClient'
-import type { Collection, DataEnvelope, Project, ProjectInput, Task, TaskInput } from '@/types/api'
+import type { Attachment, Collection, DataEnvelope, Project, ProjectInput, Task, TaskInput } from '@/types/api'
 
 export async function listProjects(): Promise<Collection<Project>> {
   const { data } = await httpClient.get<Collection<Project>>('/projects')
@@ -47,4 +47,25 @@ export async function deleteTask(projectId: number, taskId: number): Promise<voi
 export async function updateTaskStatus(taskId: number, status: Task['status']): Promise<Task> {
   const { data } = await httpClient.patch<DataEnvelope<Task>>(`/tasks/${taskId}/status`, { status })
   return data.data
+}
+
+export async function uploadTaskAttachment(
+  taskId: number,
+  file: File,
+  onProgress?: (progress: number) => void,
+): Promise<Attachment> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const { data } = await httpClient.post<DataEnvelope<Attachment>>(`/tasks/${taskId}/attachments`, formData, {
+    onUploadProgress: (event) => {
+      if (event.total) onProgress?.(Math.round((event.loaded * 100) / event.total))
+    },
+  })
+
+  return data.data
+}
+
+export async function deleteTaskAttachment(attachmentId: number): Promise<void> {
+  await httpClient.delete(`/attachments/${attachmentId}`)
 }

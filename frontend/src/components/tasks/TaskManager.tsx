@@ -4,6 +4,7 @@ import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { TaskForm } from '@/components/tasks/TaskForm'
+import { TaskAttachments } from '@/components/tasks/TaskAttachments'
 import { useCreateTask, useDeleteTask, useProjectTasks, useUpdateTask, useUpdateTaskStatus } from '@/hooks/useProjects'
 import type { Task, TaskInput } from '@/types/api'
 import { isTaskStatus, TASK_STATUS_VALUES, getTaskStatusLabel } from '@/types/api'
@@ -65,6 +66,7 @@ export function TaskManager({ projectId }: TaskManagerProps) {
                   <p className="mt-1 text-sm text-slate-600">{task.short_description}</p>
                   {task.due_date && <p className="mt-2 text-xs text-slate-500">Prazo: {new Date(task.due_date).toLocaleString('pt-BR')}</p>}
                   {task.tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{task.tags.map((tag) => <span key={tag.id} className="rounded-full px-2 py-0.5 text-xs text-white" style={{ backgroundColor: tag.color }}>{tag.name}</span>)}</div>}
+                  <TaskAttachments projectId={projectId} taskId={task.id} attachments={task.attachments} />
                   <div className="mt-3 flex items-center gap-2">
                     <select aria-label={`Alterar status de ${task.title}`} value={task.status} onChange={(event) => { if (isTaskStatus(event.target.value)) updateStatus.mutate({ taskId: task.id, status: event.target.value }) }} disabled={updateStatus.isPending} className="min-w-0 flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs">
                       {TASK_STATUS_VALUES.map((value) => <option key={value} value={value}>{getTaskStatusLabel(value)}</option>)}

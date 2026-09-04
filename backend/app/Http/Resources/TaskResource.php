@@ -25,6 +25,7 @@ class TaskResource extends JsonResource
             'status' => $status?->value,
             'position' => $this->position,
             'tags' => TagResource::collection($this->whenLoaded('tags')),
+            'attachments' => TaskAttachmentResource::collection($this->whenLoaded('attachments')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

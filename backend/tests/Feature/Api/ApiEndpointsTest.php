@@ -3,9 +3,12 @@
 namespace Tests\Feature\Api;
 
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class ApiEndpointsTest extends TestCase
@@ -131,5 +134,27 @@ class ApiEndpointsTest extends TestCase
         $this->getJson('/api/projects')
             ->assertUnauthorized()
             ->assertJsonStructure(['message']);
+    }
+
+    public function test_task_owner_can_upload_and_delete_an_attachment(): void
+    {
+        Storage::fake();
+        $user = User::factory()->create();
+        $task = Task::factory()->for(Project::factory()->create(['user_id' => $user->id]))->create();
+        $file = UploadedFile::fake()->create('manual.pdf', 100, 'application/pdf');
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->post("/api/tasks/{$task->id}/attachments", ['file' => $file]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.file_name', 'manual.pdf')
+            ->assertJsonPath('data.mime_type', 'application/pdf');
+
+        $attachmentId = $response->json('data.id');
+        $this->actingAs($user, 'sanctum')
+            ->deleteJson("/api/attachments/{$attachmentId}")
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('task_attachments', ['id' => $attachmentId]);
     }
 }

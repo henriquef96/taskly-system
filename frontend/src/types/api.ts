@@ -46,6 +46,8 @@ export interface Attachment {
   file_name: string
   mime_type: string
   file_size: number
+  created_at?: string
+  updated_at?: string
 }
 
 export interface Task {
@@ -58,6 +60,7 @@ export interface Task {
   status: TaskStatus
   position: number
   tags: Tag[]
+  attachments?: Attachment[]
   created_at: string
   updated_at: string
 }

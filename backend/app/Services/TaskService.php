@@ -13,7 +13,7 @@ class TaskService
     /** @return Collection<int, Task> */
     public function listForProject(Project $project): Collection
     {
-        return $project->tasks()->with('tags')->orderBy('position')->latest('id')->get();
+        return $project->tasks()->with(['tags', 'attachments'])->orderBy('position')->latest('id')->get();
     }
 
     /** @param array<string, mixed> $data */

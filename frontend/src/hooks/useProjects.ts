@@ -85,3 +85,23 @@ export function useUpdateTaskStatus(projectId: number) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
   })
 }
+
+export function useUploadTaskAttachment(projectId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ taskId, file, onProgress }: {
+      taskId: number
+      file: File
+      onProgress?: (progress: number) => void
+    }) => projectsApi.uploadTaskAttachment(taskId, file, onProgress),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+  })
+}
+
+export function useDeleteTaskAttachment(projectId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (attachmentId: number) => projectsApi.deleteTaskAttachment(attachmentId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+  })
+}
