@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: ia-system-app
+    container_name: taskly-system-app
     restart: unless-stopped
     volumes:
       - ./backend:/var/www/html
@@ -13,11 +13,29 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - ia-system
+      - taskly-system
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: taskly-system-frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8080/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+    networks:
+      - taskly-system
 
   nginx:
     image: nginx:alpine
-    container_name: ia-system-nginx
+    container_name: taskly-system-nginx
     restart: unless-stopped
     ports:
       - "8080:80"
@@ -27,31 +45,31 @@ services:
     depends_on:
       - app
     networks:
-      - ia-system
+      - taskly-system
 
   postgres:
     image: postgres:16-alpine
-    container_name: ia-system-postgres
+    container_name: taskly-system-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ia_system
-      POSTGRES_USER: ia_system
+      POSTGRES_DB: taskly_system
+      POSTGRES_USER: taskly_system
       POSTGRES_PASSWORD: secret
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ia_system -d ia_system"]
+      test: ["CMD-SHELL", "pg_isready -U taskly_system -d taskly_system"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - ia-system
+      - taskly-system
 
 volumes:
   postgres_data:
 
 networks:
-  ia-system:
+  taskly-system:
     driver: bridge
