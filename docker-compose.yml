@@ -4,9 +4,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: taskly-system-app
+    command: sh -c "mkdir -p /var/www/html/storage/app/private /var/www/html/storage/framework/cache /var/www/html/storage/framework/sessions /var/www/html/storage/framework/views /var/www/html/bootstrap/cache && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && find /var/www/html/storage /var/www/html/bootstrap/cache -type d -exec chmod 0770 {} + && find /var/www/html/storage /var/www/html/bootstrap/cache -type f -exec chmod 0660 {} + && exec php-fpm"
     restart: unless-stopped
     volumes:
       - ./backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+      - backend_storage:/var/www/html/storage
     environment:
       - APP_ENV=local
     depends_on:
@@ -25,7 +28,8 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8080/api
+      - VITE_API_URL=/api
+      - VITE_PROXY_TARGET=http://nginx
     command: sh -c "npm ci && npm run dev -- --host"
     ports:
       - "5173:5173"
@@ -70,6 +74,8 @@ services:
 
 volumes:
   postgres_data:
+  backend_vendor:
+  backend_storage:
 
 networks:
   taskly-system:

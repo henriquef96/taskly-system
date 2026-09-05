@@ -18,6 +18,12 @@ export interface Project {
   status: ProjectStatus
   created_at: string
   updated_at: string
+  ticket_number: number
+  attachments?: Attachment[]
+}
+
+export function formatProjectTicket(ticketNumber: number): string {
+  return `PJT-${String(ticketNumber).padStart(3, '0')}`
 }
 
 export const TASK_STATUS_VALUES = ['pending', 'in_progress', 'completed', 'cancelled'] as const
@@ -33,6 +39,10 @@ export const taskStatusLabels: Record<TaskStatus, string> = {
 
 export function getTaskStatusLabel(status: TaskStatus): string {
   return taskStatusLabels[status]
+}
+
+export function formatTaskTicket(ticketNumber: number): string {
+  return `TRF-${String(ticketNumber).padStart(3, '0')}`
 }
 
 export function isTaskStatus(value: string): value is TaskStatus {
@@ -52,6 +62,7 @@ export interface Attachment {
 
 export interface Task {
   id: number
+  ticket_number: number
   project_id: number
   title: string
   short_description: string
@@ -67,7 +78,6 @@ export interface Task {
 
 export interface AuthResponse {
   user: User
-  token: string
 }
 
 export interface UserResponse {
@@ -80,6 +90,13 @@ export interface DataEnvelope<T> {
 
 export interface Collection<T> {
   data: T[]
+}
+
+export type DashboardTask = Task
+
+export interface DashboardData {
+  projects: Project[]
+  tasks: DashboardTask[]
 }
 
 export interface ProjectRequest {

@@ -20,15 +20,19 @@ RUN apk add --no-cache \
         intl \
         opcache
 
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist \
-    && chown -R www-data:www-data storage bootstrap/cache
+RUN composer install --optimize-autoloader --no-interaction --prefer-dist \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && find storage bootstrap/cache -type d -exec chmod 0770 {} + \
+    && find storage bootstrap/cache -type f -exec chmod 0660 {} +
 
 EXPOSE 9000
 
-CMD ["php-fpm"]
+CMD ["sh", "-c", "mkdir -p /var/www/html/storage/app/private /var/www/html/storage/framework/cache /var/www/html/storage/framework/sessions /var/www/html/storage/framework/views /var/www/html/bootstrap/cache && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache && exec php-fpm"]

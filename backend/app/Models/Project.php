@@ -10,11 +10,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'description', 'status', 'user_id'])]
+#[Fillable(['name', 'description', 'status', 'user_id', 'ticket_number'])]
 class Project extends Model
 {
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::created(function (Project $project): void {
+            $project->ticket_number = $project->id;
+            $project->saveQuietly();
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -42,5 +50,10 @@ class Project extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(ProjectAttachment::class);
     }
 }

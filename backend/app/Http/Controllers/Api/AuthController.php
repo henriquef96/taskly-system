@@ -8,17 +8,20 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create($request->validated());
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
 
         return response()->json([
             'user' => $user,
-            'token' => $user->createToken('auth-token')->plainTextToken,
         ], 201);
     }
 
@@ -33,9 +36,11 @@ class AuthController extends Controller
             ], 401);
         }
 
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
+
         return response()->json([
             'user' => $user,
-            'token' => $user->createToken('auth-token')->plainTextToken,
         ]);
     }
 
@@ -48,7 +53,13 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()?->delete();
+        $token = $request->user()->currentAccessToken();
+        if ($token instanceof PersonalAccessToken) {
+            $token->delete();
+        }
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'message' => 'Logout realizado com sucesso.',

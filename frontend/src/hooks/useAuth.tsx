@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as authApi from '@/api/auth'
 import { AuthContext } from '@/auth/AuthContext'
 import { ApiError } from '@/api/ApiError'
-import { clearAuthToken, getAuthToken, setAuthToken } from '@/auth/tokenStorage'
 import type { User } from '@/types/api'
 import type { LoginInput, RegisterInput } from '@/types/auth'
 
@@ -12,18 +11,15 @@ export const currentUserQueryKey = ['auth', 'current-user'] as const
 export function useCurrentUser() {
   return useQuery({
     queryKey: currentUserQueryKey,
-    queryFn: async (): Promise<User> => {
+    queryFn: async (): Promise<User | null> => {
       try {
         const response = await authApi.getCurrentUser()
         return response.user
       } catch (error: unknown) {
-        if (error instanceof ApiError && error.status === 401) {
-          clearAuthToken()
-        }
+        if (error instanceof ApiError && error.status === 401) return null
         throw error
       }
     },
-    enabled: getAuthToken() !== null,
     retry: false,
   })
 }
@@ -34,7 +30,6 @@ export function useLogin() {
   return useMutation({
     mutationFn: (input: LoginInput) => authApi.login(input),
     onSuccess: (response) => {
-      setAuthToken(response.token)
       queryClient.setQueryData(currentUserQueryKey, response.user)
     },
   })
@@ -46,7 +41,6 @@ export function useRegister() {
   return useMutation({
     mutationFn: (input: RegisterInput) => authApi.register(input),
     onSuccess: (response) => {
-      setAuthToken(response.token)
       queryClient.setQueryData(currentUserQueryKey, response.user)
     },
   })
@@ -58,7 +52,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: authApi.logout,
     onSettled: () => {
-      clearAuthToken()
+      queryClient.setQueryData(currentUserQueryKey, null)
       queryClient.clear()
     },
   })

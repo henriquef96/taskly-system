@@ -5,11 +5,10 @@ import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { TaskForm } from '@/components/tasks/TaskForm'
-import { TaskAttachments } from '@/components/tasks/TaskAttachments'
-import { useCreateTask, useDeleteTask, useProjectTasks, useUpdateTask, useUpdateTaskStatus } from '@/hooks/useProjects'
+import { TaskCard } from '@/components/tasks/TaskCard'
+import { useCreateTask, useDeleteTask, useProjectTasks, useTags, useUpdateTask, useUpdateTaskStatus } from '@/hooks/useProjects'
 import type { Task, TaskInput } from '@/types/api'
-import { isTaskStatus, TASK_STATUS_VALUES, getTaskStatusLabel } from '@/types/api'
-import type { Tag } from '@/types/tags'
+import { TASK_STATUS_VALUES, getTaskStatusLabel } from '@/types/api'
 
 interface TaskManagerProps { projectId: number }
 
@@ -22,6 +21,7 @@ const STATUS_STYLES: Record<(typeof TASK_STATUS_VALUES)[number], string> = {
 
 export function TaskManager({ projectId }: TaskManagerProps) {
   const query = useProjectTasks(projectId)
+  const tagsQuery = useTags()
   const createTask = useCreateTask(projectId)
   const updateTask = useUpdateTask(projectId)
   const deleteTask = useDeleteTask(projectId)
@@ -38,11 +38,10 @@ export function TaskManager({ projectId }: TaskManagerProps) {
   }
 
   const tasks = [...(query.data?.data ?? [])].sort((a, b) => a.position - b.position)
-  const availableTags = Array.from(
-    new Map<number, Tag>(tasks.flatMap((task) => task.tags).map((tag) => [tag.id, tag])).values(),
-  ).sort((a, b) => a.name.localeCompare(b.name))
+  const tagOrder = ['Desenvolvimento', 'Revisão', 'Documentação', 'Deploy']
+  const availableTags = [...(tagsQuery.data?.data ?? [])].sort((a, b) => tagOrder.indexOf(a.name) - tagOrder.indexOf(b.name))
   const mutationError = createTask.error ?? updateTask.error
-  const actionError = mutationError ?? updateStatus.error ?? deleteTask.error
+  const actionError = mutationError ?? updateStatus.error ?? deleteTask.error ?? tagsQuery.error
 
   return (
     <section className="mt-8 space-y-5" aria-label="Tarefas do projeto">
@@ -56,26 +55,13 @@ export function TaskManager({ projectId }: TaskManagerProps) {
       {query.error && <ErrorState title="Não foi possível carregar as tarefas" message={getApiErrorMessage(query.error, 'Tente novamente em alguns instantes.')} onRetry={() => void query.refetch()} />}
       {!query.isLoading && !query.error && tasks.length === 0 && <EmptyState title="Nenhuma tarefa por aqui" message="Crie a primeira tarefa deste projeto." />}
       {!query.isLoading && !query.error && tasks.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {TASK_STATUS_VALUES.map((status) => {
             const statusTasks = tasks.filter((task) => task.status === status)
-            return <div key={status} className={`rounded-xl border p-3 ${STATUS_STYLES[status]}`}>
+            return <div key={status} className={`min-w-0 rounded-xl border p-3 ${STATUS_STYLES[status]}`}>
               <h3 className="mb-3 text-sm font-semibold">{getTaskStatusLabel(status)} <span className="font-normal text-slate-500">({statusTasks.length})</span></h3>
-              <div className="space-y-3">
-                {statusTasks.map((task) => <article key={task.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-                  <div className="flex items-start justify-between gap-2"><h4 className="font-semibold">{task.title}</h4><span className="text-xs text-slate-400">#{task.position}</span></div>
-                  <p className="mt-1 text-sm text-slate-600">{task.short_description}</p>
-                  {task.due_date && <p className="mt-2 text-xs text-slate-500">Prazo: {new Date(task.due_date).toLocaleString('pt-BR')}</p>}
-                  {task.tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{task.tags.map((tag) => <span key={tag.id} className="rounded-full px-2 py-0.5 text-xs text-white" style={{ backgroundColor: tag.color }}>{tag.name}</span>)}</div>}
-                  <TaskAttachments projectId={projectId} taskId={task.id} attachments={task.attachments} />
-                  <div className="mt-3 flex items-center gap-2">
-                    <select aria-label={`Alterar status de ${task.title}`} value={task.status} onChange={(event) => { if (isTaskStatus(event.target.value)) updateStatus.mutate({ taskId: task.id, status: event.target.value }) }} disabled={updateStatus.isPending} className="min-w-0 flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs">
-                      {TASK_STATUS_VALUES.map((value) => <option key={value} value={value}>{getTaskStatusLabel(value)}</option>)}
-                    </select>
-                    <button type="button" onClick={() => { setEditingTask(task); setIsCreating(false) }} className="text-xs font-medium text-indigo-600">Editar</button>
-                    <button type="button" onClick={() => { if (window.confirm(`Excluir a tarefa "${task.title}"?`)) deleteTask.mutate(task.id) }} disabled={deleteTask.isPending} className="text-xs font-medium text-red-600 disabled:opacity-60">Excluir</button>
-                  </div>
-                </article>)}
+              <div className="max-h-[calc(100vh-15rem)] min-h-24 space-y-3 overflow-y-auto pr-1">
+                {statusTasks.map((task) => <TaskCard key={task.id} task={task} projectId={projectId} onStatusChange={(taskId, status) => updateStatus.mutate({ taskId, status })} onEdit={(selectedTask) => { setEditingTask(selectedTask); setIsCreating(false) }} onDelete={(selectedTask) => { if (window.confirm(`Excluir a tarefa "${selectedTask.title}"?`)) deleteTask.mutate(selectedTask.id) }} isStatusUpdating={updateStatus.isPending} isDeleting={deleteTask.isPending} />)}
               </div>
             </div>
           })}

@@ -11,4 +11,3 @@ storage/framework/sessions/*
 storage/framework/views/*
 tests
 .phpunit.cache
-docker

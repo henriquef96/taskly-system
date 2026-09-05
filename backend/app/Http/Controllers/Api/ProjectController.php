@@ -33,7 +33,7 @@ class ProjectController extends Controller
         Gate::authorize('create', Project::class);
 
         return new ProjectResource(
-            $this->projectService->create($user, $request->validated()),
+            $this->projectService->create($user, $request->validated())->loadCount('tasks'),
         );
     }
 
@@ -41,7 +41,7 @@ class ProjectController extends Controller
     {
         Gate::authorize('view', $project);
 
-        return new ProjectResource($project);
+        return new ProjectResource($project->load(['attachments'])->loadCount('tasks'));
     }
 
     public function update(UpdateProjectRequest $request, Project $project): ProjectResource
@@ -49,7 +49,7 @@ class ProjectController extends Controller
         Gate::authorize('update', $project);
 
         return new ProjectResource(
-            $this->projectService->update($project, $request->validated()),
+            $this->projectService->update($project, $request->validated())->loadCount('tasks'),
         );
     }
 

@@ -1,4 +1,4 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as projectsApi from '@/api/projects'
 import type { ProjectInput, TaskInput, TaskStatus } from '@/types/api'
 
@@ -6,11 +6,19 @@ export function useProjects() {
   return useQuery({ queryKey: ['projects'], queryFn: projectsApi.listProjects })
 }
 
+export function useTags() {
+  return useQuery({ queryKey: ['tags'], queryFn: projectsApi.listTags })
+}
+
+
 export function useCreateProject() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: ProjectInput) => projectsApi.createProject(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
   })
 }
 
@@ -30,6 +38,7 @@ export function useUpdateProject() {
     onSuccess: (project) => {
       queryClient.setQueryData(['projects', project.id], project)
       void queryClient.invalidateQueries({ queryKey: ['projects'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })
 }
@@ -40,6 +49,29 @@ export function useDeleteProject() {
     mutationFn: (projectId: number) => projectsApi.deleteProject(projectId),
     onSuccess: (_data, projectId) => {
       queryClient.removeQueries({ queryKey: ['projects', projectId] })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}
+
+export function useUploadProjectAttachment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ projectId, file, onProgress }: { projectId: number; file: File; onProgress?: (progress: number) => void }) => projectsApi.uploadProjectAttachment(projectId, file, onProgress),
+    onSuccess: (_attachment, { projectId }) => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId] })
+      void queryClient.invalidateQueries({ queryKey: ['projects'] })
+    },
+  })
+}
+
+export function useDeleteProjectAttachment(projectId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (attachmentId: number) => projectsApi.deleteProjectAttachment(attachmentId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId] })
       void queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
   })
@@ -54,29 +86,20 @@ export function useProjectTasks(projectId: number) {
 }
 
 export function useDashboardData() {
-  const projectsQuery = useProjects()
-  const projectIds = projectsQuery.data?.data.map((project) => project.id) ?? []
-  const taskQueries = useQueries({
-    queries: projectIds.map((projectId) => ({
-      queryKey: ['projects', projectId, 'tasks'],
-      queryFn: () => projectsApi.listTasks(projectId),
-    })),
+  return useQuery({
+    queryKey: ['dashboard'],
+    queryFn: projectsApi.getDashboard,
   })
-
-  return {
-    projectsQuery,
-    taskQueries,
-    tasks: taskQueries.flatMap((query) => query.data?.data ?? []),
-    isLoading: projectsQuery.isLoading || taskQueries.some((query) => query.isLoading),
-    error: projectsQuery.error ?? taskQueries.find((query) => query.error)?.error,
-  }
 }
 
 export function useCreateTask(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: TaskInput) => projectsApi.createTask(projectId, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
   })
 }
 
@@ -85,7 +108,10 @@ export function useUpdateTask(projectId: number) {
   return useMutation({
     mutationFn: ({ taskId, input }: { taskId: number; input: TaskInput }) =>
       projectsApi.updateTask(projectId, taskId, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
   })
 }
 
@@ -93,7 +119,10 @@ export function useDeleteTask(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (taskId: number) => projectsApi.deleteTask(projectId, taskId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
   })
 }
 
@@ -101,7 +130,10 @@ export function useUpdateTaskStatus(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ taskId, status }: { taskId: number; status: TaskStatus }) => projectsApi.updateTaskStatus(taskId, status),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
   })
 }
 
@@ -113,7 +145,10 @@ export function useUploadTaskAttachment(projectId: number) {
       file: File
       onProgress?: (progress: number) => void
     }) => projectsApi.uploadTaskAttachment(taskId, file, onProgress),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
   })
 }
 
@@ -121,6 +156,9 @@ export function useDeleteTaskAttachment(projectId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (attachmentId: number) => projectsApi.deleteTaskAttachment(attachmentId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
   })
 }

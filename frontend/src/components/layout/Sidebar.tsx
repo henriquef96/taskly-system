@@ -68,6 +68,22 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </svg>
             Visão geral
           </NavLink>
+          <NavLink
+            to="/projects"
+            onClick={onClose}
+            className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'}`}
+          >
+            <span aria-hidden="true" className="text-lg">□</span>
+            Projetos
+          </NavLink>
+          <NavLink
+            to="/tasks"
+            onClick={onClose}
+            className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'}`}
+          >
+            <span aria-hidden="true" className="text-lg">✓</span>
+            Tarefas
+          </NavLink>
         </nav>
         {user && <UserProfile user={user} isLoggingOut={logout.isPending} onLogout={() => void logout.mutateAsync()} />}
       </aside>

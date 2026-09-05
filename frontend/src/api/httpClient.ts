@@ -1,20 +1,16 @@
 import axios, { isAxiosError } from 'axios'
 import { ApiError, isApiErrorPayload } from '@/api/ApiError'
-import { getAuthToken } from '@/auth/tokenStorage'
 import { env } from '@/config/env'
 
-/**
- * Cliente HTTP único da aplicação. O token é lido apenas no momento da
- * requisição para evitar estado duplicado entre autenticação e transporte.
- */
 export const httpClient = axios.create({
   baseURL: env.apiUrl,
   headers: { Accept: 'application/json' },
+  withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
 })
 
 httpClient.interceptors.request.use((config) => {
-  const token = getAuthToken()
-  if (token) config.headers.Authorization = `Bearer ${token}`
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type']
   }

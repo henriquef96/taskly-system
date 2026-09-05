@@ -15,7 +15,7 @@ class ApiEndpointsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_register_creates_a_user_and_returns_a_token(): void
+    public function test_register_creates_a_user_and_starts_a_session(): void
     {
         $response = $this->postJson('/api/register', [
             'name' => 'Ana Silva',
@@ -26,7 +26,8 @@ class ApiEndpointsTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['user' => ['id', 'name', 'email'], 'token'])
+            ->assertJsonStructure(['user' => ['id', 'name', 'email']])
+            ->assertJsonMissingPath('token')
             ->assertJsonPath('user.email', 'ana@example.com');
         $this->assertTrue(
             DB::table('users')->where('email', 'ana@example.com')->exists(),
@@ -34,17 +35,27 @@ class ApiEndpointsTest extends TestCase
         );
     }
 
-    public function test_login_returns_a_token_for_valid_credentials_and_rejects_invalid_credentials(): void
+    public function test_login_starts_a_session_for_valid_credentials_and_rejects_invalid_credentials(): void
     {
         User::factory()->create([
             'email' => 'ana@example.com',
             'password' => 'Senha@123',
         ]);
 
-        $this->postJson('/api/login', [
+        $this->withHeaders([
+            'Origin' => 'http://localhost:5173',
+            'Referer' => 'http://localhost:5173/login',
+        ])->postJson('/api/login', [
             'email' => 'ana@example.com',
             'password' => 'Senha@123',
-        ])->assertOk()->assertJsonStructure(['user', 'token']);
+        ])->assertOk()->assertJsonStructure(['user'])->assertJsonMissingPath('token');
+
+        $this->withHeaders([
+            'Origin' => 'http://localhost:5173',
+            'Referer' => 'http://localhost:5173/dashboard',
+        ])->getJson('/api/me')
+            ->assertOk()
+            ->assertJsonPath('user.email', 'ana@example.com');
 
         $this->postJson('/api/login', [
             'email' => 'ana@example.com',
@@ -52,6 +63,31 @@ class ApiEndpointsTest extends TestCase
         ])->assertUnauthorized()->assertJson([
             'message' => 'As credenciais informadas são inválidas.',
         ]);
+    }
+
+    public function test_authenticated_user_can_logout_with_the_same_http_method_used_by_the_frontend(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $this->withToken($token->plainTextToken)
+            ->postJson('/api/logout')
+            ->assertOk()
+            ->assertJson(['message' => 'Logout realizado com sucesso.']);
+
+        $this->assertDatabaseMissing('personal_access_tokens', ['id' => $token->accessToken->id]);
+    }
+
+    public function test_cookie_session_user_can_logout_and_is_no_longer_authenticated(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'web')
+            ->postJson('/api/logout')
+            ->assertOk()
+            ->assertJson(['message' => 'Logout realizado com sucesso.']);
+
+        $this->assertGuest('web');
     }
 
     public function test_authenticated_user_can_read_their_projects_and_cannot_read_another_users_project(): void
@@ -71,6 +107,23 @@ class ApiEndpointsTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_authenticated_user_can_load_the_dashboard_without_other_users_data(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $project = Project::factory()->create(['user_id' => $user->id]);
+        $otherProject = Project::factory()->create(['user_id' => $otherUser->id]);
+        $task = Task::factory()->for($project)->create(['title' => 'Tarefa do dashboard']);
+        Task::factory()->for($otherProject)->create(['title' => 'Tarefa de outro usuário']);
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/dashboard')
+            ->assertOk()
+            ->assertJsonPath('data.projects.0.id', $project->id)
+            ->assertJsonPath('data.tasks.0.id', $task->id)
+            ->assertJsonMissing(['title' => 'Tarefa de outro usuário']);
+    }
+
     public function test_authenticated_user_can_create_update_and_delete_a_project(): void
     {
         $user = User::factory()->create();
@@ -80,7 +133,9 @@ class ApiEndpointsTest extends TestCase
             'description' => 'Projeto criado pelo teste de integração.',
         ]);
 
-        $response->assertCreated()->assertJsonPath('data.name', 'Projeto API');
+        $response->assertCreated()
+            ->assertJsonPath('data.name', 'Projeto API')
+            ->assertJsonPath('data.ticket_number', $response->json('data.id'));
         $projectId = $response->json('data.id');
 
         $this->actingAs($user, 'sanctum')

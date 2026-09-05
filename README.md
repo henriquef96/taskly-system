@@ -1,6 +1,10 @@
 # taskly-system
 
-Base do projeto full-stack: backend em Laravel (API REST) + PostgreSQL e frontend em React + TypeScript + Tailwind CSS + Vite, com infraestrutura via Docker Compose.
+Projeto Full-Stack de acompanhamento e gerenciamento de atividades.
+
+Backend: Laravel (API REST) + PostgreSQL.
+Frontend: React + TypeScript + Tailwind CSS + Vite.
+Infraestrutura: Container Docker, Docker Compose.
 
 ## Estrutura
 
@@ -17,6 +21,7 @@ Base do projeto full-stack: backend em Laravel (API REST) + PostgreSQL e fronten
 
 ```bash
 docker compose up -d --build
+deocker compose install
 docker compose exec app php artisan migrate
 ```
 

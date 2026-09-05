@@ -16,6 +16,7 @@ let taskState: { data: { data: (typeof task)[] } | undefined; isLoading: boolean
 
 vi.mock('@/hooks/useProjects', () => ({
   useProjectTasks: () => taskState,
+  useTags: () => ({ data: { data: [] }, isLoading: false, error: null }),
   useCreateTask: () => ({ mutate: createMutate, isPending: false, error: null }),
   useUpdateTask: () => ({ mutate: vi.fn(), isPending: false, error: null }),
   useDeleteTask: () => ({ mutate: deleteMutate, isPending: false, error: null }),

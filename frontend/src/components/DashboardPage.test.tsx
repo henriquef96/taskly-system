@@ -1,16 +1,14 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { DashboardPage } from '@/pages/DashboardPage'
-import { user, project } from '@/test/fixtures'
+import { user } from '@/test/fixtures'
 import { AuthContext } from '@/auth/AuthContext'
 import { TestProviders } from '@/test/testUtils'
 
 const dashboardState = {
-  projectsQuery: { data: { data: [project] }, isLoading: false, error: null, refetch: vi.fn() },
-  taskQueries: [],
-  tasks: [],
-  isLoading: false,
-  error: null,
+data: { projects: [], tasks: [] },
+isLoading: false,
+error: null,
 }
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -20,11 +18,12 @@ vi.mock('@/hooks/useAuth', () => ({
 vi.mock('@/hooks/useProjects', () => ({
   useDashboardData: () => dashboardState,
   useCreateProject: () => ({ mutate: vi.fn(), isPending: false, error: null }),
+  useUploadProjectAttachment: () => ({ mutate: vi.fn(), isPending: false, error: null }),
   useDeleteProject: () => ({ mutate: vi.fn(), isPending: false, error: null }),
 }))
 
 describe('DashboardPage', () => {
-  it('lista os projetos retornados pela API', () => {
+  it('mantém a visão geral sem o bloco de projetos recentes', () => {
     render(
       <TestProviders>
         <AuthContext.Provider value={{ user, isLoading: false }}>
@@ -33,7 +32,8 @@ describe('DashboardPage', () => {
       </TestProviders>,
     )
 
-    expect(screen.getByRole('link', { name: project.name })).toBeInTheDocument()
-    expect(screen.getByText('1 exibidos')).toBeInTheDocument()
+    expect(screen.queryByText('Projetos recentes')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Projetos' })).toHaveAttribute('href', '/projects')
+    expect(screen.getByRole('link', { name: 'Tarefas' })).toHaveAttribute('href', '/tasks')
   })
 })

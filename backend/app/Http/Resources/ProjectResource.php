@@ -12,12 +12,14 @@ class ProjectResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'ticket_number' => $this->ticket_number,
             'name' => $this->name,
             'description' => $this->description,
             'status' => $this->status?->value,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'attachments' => ProjectAttachmentResource::collection($this->whenLoaded('attachments')),
         ];
     }
 }

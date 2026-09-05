@@ -11,7 +11,9 @@ class TaskAttachmentService
 {
     public function store(Task $task, UploadedFile $file): TaskAttachment
     {
-        $path = $file->store("tasks/{$task->id}/attachments");
+        $disk = Storage::disk('local');
+        $directory = "tasks/{$task->id}/attachments";
+        $path = $disk->putFile($directory, $file);
 
         if ($path === false) {
             throw new \RuntimeException('Unable to store the attachment.');

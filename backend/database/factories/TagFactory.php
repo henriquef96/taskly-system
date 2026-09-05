@@ -15,11 +15,11 @@ class TagFactory extends Factory
      *
      * @var array<int, string>
      */
-    private const NAMES = [
-        'Urgente', 'Bug', 'Melhoria', 'Documentação', 'Frontend',
-        'Backend', 'Design', 'Testes', 'Infraestrutura', 'Revisão',
-        'Bloqueado', 'Pesquisa', 'Refatoração', 'Segurança', 'Performance',
-        'API', 'Banco de Dados', 'UX', 'Planejamento', 'Deploy',
+    private const TAGS = [
+        ['name' => 'Desenvolvimento', 'color' => '#BFDBFE'],
+        ['name' => 'Revisão', 'color' => '#DDD6FE'],
+        ['name' => 'Documentação', 'color' => '#FEF3C7'],
+        ['name' => 'Deploy', 'color' => '#BBF7D0'],
     ];
 
     /**
@@ -30,8 +30,7 @@ class TagFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->randomElement(self::NAMES),
-            'color' => fake()->hexColor(),
+            ...fake()->randomElement(self::TAGS),
         ];
     }
 }

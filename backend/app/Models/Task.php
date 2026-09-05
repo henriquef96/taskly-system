@@ -11,11 +11,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['project_id', 'title', 'short_description', 'full_description', 'due_date', 'status', 'position'])]
+#[Fillable(['project_id', 'title', 'short_description', 'full_description', 'due_date', 'status', 'position', 'ticket_number'])]
 class Task extends Model
 {
     /** @use HasFactory<TaskFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::created(function (Task $task): void {
+            $task->ticket_number = $task->id;
+            $task->saveQuietly();
+        });
+    }
 
     /**
      * Get the attributes that should be cast.

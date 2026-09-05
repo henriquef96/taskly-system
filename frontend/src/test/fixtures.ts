@@ -10,10 +10,12 @@ export const project: Project = {
   status: 'active',
   created_at: '2026-09-01T10:00:00Z',
   updated_at: '2026-09-01T10:00:00Z',
+  ticket_number: 1,
 }
 
 export const task: Task = {
   id: 20,
+  ticket_number: 20,
   project_id: project.id,
   title: 'Publicar landing page',
   short_description: 'Revisar e publicar a landing page',

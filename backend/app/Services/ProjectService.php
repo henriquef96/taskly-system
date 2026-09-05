@@ -12,7 +12,7 @@ class ProjectService
     /** @return Collection<int, Project> */
     public function listForUser(User $user): Collection
     {
-        return $user->projects()->latest()->get();
+        return $user->projects()->withCount('tasks')->latest()->get();
     }
 
     public function create(User $user, array $data): Project

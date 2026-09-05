@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useState } from 'react'
 import { ApiError } from '@/api/ApiError'
 import { getApiErrorMessage } from '@/api/errorMessage'
 import { ProjectForm } from '@/components/projects/ProjectForm'
@@ -17,13 +18,14 @@ export function ProjectDetailPage() {
   const updateProject = useUpdateProject()
   const deleteProject = useDeleteProject()
   const project = projectQuery.data
+  const [isEditing, setIsEditing] = useState(false)
 
   if (!Number.isInteger(parsedProjectId) || parsedProjectId <= 0) {
     return <ErrorState title="Projeto inválido" message="O projeto solicitado não foi encontrado." />
   }
 
   const handleUpdate = (input: ProjectInput) => {
-    updateProject.mutate({ projectId: parsedProjectId, input })
+    updateProject.mutate({ projectId: parsedProjectId, input }, { onSuccess: () => setIsEditing(false) })
   }
 
   const handleDelete = () => {
@@ -47,6 +49,10 @@ export function ProjectDetailPage() {
           serverError={updateProject.error ? getApiErrorMessage(updateProject.error, 'Não foi possível salvar o projeto.') : undefined}
           serverErrors={updateProject.error instanceof ApiError ? updateProject.error.errors : undefined}
           onSubmit={handleUpdate}
+          isEditing={isEditing}
+          onEdit={() => setIsEditing(true)}
+          onCancel={() => setIsEditing(false)}
+          projectAttachments={project.attachments}
         />
       )}
       {project && <TaskManager projectId={project.id} />}

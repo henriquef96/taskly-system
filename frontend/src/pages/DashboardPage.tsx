@@ -8,8 +8,8 @@ import { ErrorState } from '@/components/feedback/ErrorState'
 import { AuthenticatedLayout } from '@/components/layout/AuthenticatedLayout'
 import { ProjectForm } from '@/components/projects/ProjectForm'
 import { useAuth } from '@/hooks/useAuth'
-import { useCreateProject, useDashboardData, useDeleteProject } from '@/hooks/useProjects'
-import { getTaskStatusLabel, TASK_STATUS_VALUES, type ProjectInput, type Task, type TaskStatus } from '@/types/api'
+import { useCreateProject, useDashboardData, useUploadProjectAttachment } from '@/hooks/useProjects'
+import { getTaskStatusLabel, TASK_STATUS_VALUES, type DashboardTask, type ProjectInput, type TaskStatus } from '@/types/api'
 
 const STATUS_STYLES: Record<TaskStatus, { bar: string; text: string }> = {
   pending: { bar: 'bg-slate-400', text: 'text-slate-600' },
@@ -35,7 +35,7 @@ function StatCard({ label, value, detail, accent }: { label: string; value: numb
   )
 }
 
-function TaskStatusSummary({ tasks }: { tasks: Task[] }) {
+function TaskStatusSummary({ tasks }: { tasks: DashboardTask[] }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="status-title">
       <div className="flex items-center justify-between gap-4">
@@ -66,7 +66,7 @@ function TaskStatusSummary({ tasks }: { tasks: Task[] }) {
   )
 }
 
-function UpcomingTasks({ tasks, projectNames }: { tasks: Task[]; projectNames: Map<number, string> }) {
+function UpcomingTasks({ tasks, projectNames }: { tasks: DashboardTask[]; projectNames: Map<number, string> }) {
   const upcomingTasks = useMemo(() => {
     const limit = new Date()
     limit.setDate(limit.getDate() + 7)
@@ -109,25 +109,22 @@ export function DashboardPage() {
   const { user } = useAuth()
   const dashboard = useDashboardData()
   const createProject = useCreateProject()
-  const deleteProject = useDeleteProject()
+  const uploadAttachment = useUploadProjectAttachment()
   const [isCreating, setIsCreating] = useState(false)
-  const projects = dashboard.projectsQuery.data?.data ?? []
+  const projects = dashboard.data?.projects ?? []
+  const tasks = dashboard.data?.tasks ?? []
   const projectNames = new Map(projects.map((project) => [project.id, project.name]))
-  const activeTasks = dashboard.tasks.filter((task) => task.status !== 'completed' && task.status !== 'cancelled').length
-  const completedTasks = dashboard.tasks.filter((task) => task.status === 'completed').length
-  const recentProjects = [...projects].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4)
-
-  const handleCreate = (input: ProjectInput) => {
-    createProject.mutate(input, { onSuccess: () => setIsCreating(false) })
-  }
-
-  const handleDelete = (projectId: number, projectName: string) => {
-    if (window.confirm(`Excluir o projeto "${projectName}"? Esta ação não pode ser desfeita.`)) deleteProject.mutate(projectId)
+  const activeTasks = tasks.filter((task) => task.status !== 'completed' && task.status !== 'cancelled').length
+  const completedTasks = tasks.filter((task) => task.status === 'completed').length
+  const handleCreate = (input: ProjectInput, attachment?: File) => {
+    createProject.mutate(input, { onSuccess: (project) => {
+      if (attachment) uploadAttachment.mutate({ projectId: project.id, file: attachment }, { onSuccess: () => setIsCreating(false) })
+      else setIsCreating(false)
+    } })
   }
 
   const retry = () => {
-    void dashboard.projectsQuery.refetch()
-    dashboard.taskQueries.forEach((query) => void query.refetch())
+    void dashboard.refetch()
   }
 
   return (
@@ -143,14 +140,13 @@ export function DashboardPage() {
       </div>
       {isCreating && (
         <div className="mb-6">
-          <ProjectForm isSubmitting={createProject.isPending} serverError={createProject.error ? getApiErrorMessage(createProject.error, 'Não foi possível criar o projeto.') : undefined} serverErrors={createProject.error instanceof ApiError ? createProject.error.errors : undefined} onSubmit={handleCreate} onCancel={() => setIsCreating(false)} />
+          <ProjectForm isSubmitting={createProject.isPending || uploadAttachment.isPending} serverError={createProject.error ? getApiErrorMessage(createProject.error, 'Não foi possível criar o projeto.') : uploadAttachment.error ? getApiErrorMessage(uploadAttachment.error, 'Não foi possível enviar o anexo.') : undefined} serverErrors={createProject.error instanceof ApiError ? createProject.error.errors : undefined} onSubmit={handleCreate} onCancel={() => setIsCreating(false)} />
         </div>
       )}
       {dashboard.isLoading && <DashboardSkeleton />}
       {!dashboard.isLoading && dashboard.error && (
         <ErrorState title="Não foi possível carregar seu dashboard" message={getApiErrorMessage(dashboard.error, 'Tente novamente em alguns instantes.')} onRetry={retry} />
       )}
-      {deleteProject.error && <p className="mb-4 text-sm text-red-600" role="alert">{getApiErrorMessage(deleteProject.error, 'Não foi possível excluir o projeto.')}</p>}
       {!dashboard.isLoading && !dashboard.error && projects.length === 0 && (
         <EmptyState title="Comece criando seu primeiro projeto" message="Organize suas tarefas por projetos e acompanhe seu progresso por aqui." />
       )}
@@ -158,32 +154,14 @@ export function DashboardPage() {
         <div className="space-y-6">
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo">
             <StatCard label="Projetos" value={projects.length} detail="projetos cadastrados" accent="bg-indigo-500" />
-            <StatCard label="Tarefas" value={dashboard.tasks.length} detail="tarefas no total" accent="bg-blue-500" />
+            <StatCard label="Tarefas" value={tasks.length} detail="tarefas no total" accent="bg-blue-500" />
             <StatCard label="Em andamento" value={activeTasks} detail="tarefas para focar" accent="bg-amber-400" />
             <StatCard label="Concluídas" value={completedTasks} detail="tarefas finalizadas" accent="bg-emerald-500" />
           </section>
           <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-            <TaskStatusSummary tasks={dashboard.tasks} />
-            <UpcomingTasks tasks={dashboard.tasks} projectNames={projectNames} />
+            <TaskStatusSummary tasks={tasks} />
+            <UpcomingTasks tasks={tasks} projectNames={projectNames} />
           </div>
-          <section aria-labelledby="recent-projects-title">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 id="recent-projects-title" className="font-semibold text-slate-950">Projetos recentes</h2>
-              <span className="text-sm text-slate-500">{recentProjects.length} exibidos</span>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {recentProjects.map((project) => (
-                <article key={project.id} className="flex min-h-36 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <Link to={`/projects/${project.id}`} className="font-semibold text-slate-950 hover:text-indigo-600">{project.name}</Link>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">{project.description ?? 'Sem descrição'}</p>
-                  <div className="mt-auto flex items-center justify-between pt-4">
-                    <Link to={`/projects/${project.id}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">Abrir projeto</Link>
-                    <button type="button" onClick={() => handleDelete(project.id, project.name)} disabled={deleteProject.isPending} className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60">Excluir</button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
         </div>
       )}
     </AuthenticatedLayout>

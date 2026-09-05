@@ -8,18 +8,17 @@ use Illuminate\Database\Seeder;
 
 class ProjectSeeder extends Seeder
 {
-    /**
-     * Seed the application's projects.
-     *
-     * Cada usuário recebe entre 2 e 5 projetos, garantindo volume
-     * suficiente para validar a paginação da API.
-     */
     public function run(): void
     {
-        User::all()->each(function (User $user) {
+        User::all()->each(function (User $user): void {
             Project::factory()
-                ->count(fake()->numberBetween(2, 5))
+                ->count(8)
+                ->active()
                 ->create(['user_id' => $user->id]);
+        });
+
+        Project::query()->whereNull('ticket_number')->each(function (Project $project): void {
+            $project->update(['ticket_number' => $project->id]);
         });
     }
 }
