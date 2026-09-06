@@ -23,7 +23,7 @@ export function TaskAttachments({ projectId, taskId, attachments }: TaskAttachme
   const [uploadError, setUploadError] = useState<string>()
   const [progress, setProgress] = useState<number>()
   const upload = useUploadTaskAttachment(projectId)
-  const remove = useDeleteTaskAttachment(projectId)
+  const remove = useDeleteTaskAttachment(projectId, taskId)
 
   const handleFile = (file: File | undefined) => {
     if (!file) return

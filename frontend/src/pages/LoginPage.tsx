@@ -27,7 +27,7 @@ export function LoginPage() {
             <span aria-hidden="true">●</span>
             Operação em dia
           </div>
-          <h1 className="w-100 break-words text-5xl leading-[0.94] text-[var(--color-ink)]">
+          <h1 className="w-full break-words text-4xl leading-[0.98] text-[var(--color-ink)] sm:text-5xl">
             Taskly organiza a próxima entrega.
           </h1>
           <p className="mt-4 max-w-[32rem] text-base leading-7 text-[var(--color-muted)]">

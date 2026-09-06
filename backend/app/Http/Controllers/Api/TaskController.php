@@ -91,17 +91,19 @@ class TaskController extends Controller
         );
     }
 
-    public function deleteAttachment(TaskAttachment $attachment): Response
+    public function deleteAttachment(Task $task, TaskAttachment $attachment): Response
     {
-        Gate::authorize('delete', $attachment->task);
+        Gate::authorize('delete', $task);
+        abort_unless($attachment->task_id === $task->id, 404);
         $this->taskAttachmentService->delete($attachment);
 
         return response()->noContent();
     }
 
-    public function downloadAttachment(TaskAttachment $attachment): BinaryFileResponse
+    public function downloadAttachment(Task $task, TaskAttachment $attachment): BinaryFileResponse
     {
-        Gate::authorize('view', $attachment->task);
+        Gate::authorize('view', $task);
+        abort_unless($attachment->task_id === $task->id, 404);
 
         $disk = Storage::disk('local');
 

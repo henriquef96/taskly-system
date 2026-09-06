@@ -56,6 +56,7 @@ export function TasksPage() {
       {editingTask && (
         <div className="mb-5">
           <TaskForm
+            projectId={editingTask.project_id}
             task={editingTask}
             availableTags={availableTags}
             isSubmitting={updateTask.isPending}

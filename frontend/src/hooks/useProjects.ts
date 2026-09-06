@@ -132,7 +132,7 @@ export function useDeleteProjectAttachment(projectId: number) {
   const { showToast } = useToast()
 
   return useMutation({
-    mutationFn: (attachmentId: number) => projectsApi.deleteProjectAttachment(attachmentId),
+    mutationFn: (attachmentId: number) => projectsApi.deleteProjectAttachment(projectId, attachmentId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['projects', projectId] })
       void queryClient.invalidateQueries({ queryKey: ['projects'] })
@@ -319,12 +319,12 @@ export function useUploadTaskAttachment(projectId: number) {
   })
 }
 
-export function useDeleteTaskAttachment(projectId: number) {
+export function useDeleteTaskAttachment(projectId: number, taskId: number) {
   const queryClient = useQueryClient()
   const { showToast } = useToast()
 
   return useMutation({
-    mutationFn: (attachmentId: number) => projectsApi.deleteTaskAttachment(attachmentId),
+    mutationFn: (attachmentId: number) => projectsApi.deleteTaskAttachment(taskId, attachmentId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] })

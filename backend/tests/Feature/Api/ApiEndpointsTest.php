@@ -65,6 +65,32 @@ class ApiEndpointsTest extends TestCase
         ]);
     }
 
+    public function test_login_is_rate_limited(): void
+    {
+        User::factory()->create(['email' => 'ana@example.com', 'password' => 'Senha@123']);
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+        $this->postJson('/api/login', [
+            'email' => 'ana@example.com',
+            'password' => 'senha-incorreta',
+        ])->assertUnauthorized();
+        }
+
+        $this->postJson('/api/login', [
+        'email' => 'ana@example.com',
+        'password' => 'senha-incorreta',
+        ])->assertStatus(429);
+    }
+
+    public function test_password_change_requires_authentication(): void
+    {
+        $this->patchJson('/api/password', [
+        'current_password' => 'Senha@123',
+        'password' => 'NovaSenha@456',
+        'password_confirmation' => 'NovaSenha@456',
+        ])->assertUnauthorized();
+    }
+
     public function test_authenticated_user_can_logout_with_the_same_http_method_used_by_the_frontend(): void
     {
         $user = User::factory()->create();
@@ -237,7 +263,7 @@ class ApiEndpointsTest extends TestCase
 
         $attachmentId = $response->json('data.id');
         $this->actingAs($user, 'sanctum')
-            ->deleteJson("/api/attachments/{$attachmentId}")
+            ->deleteJson("/api/tasks/{$task->id}/attachments/{$attachmentId}")
             ->assertNoContent();
 
         $this->assertDatabaseMissing('task_attachments', ['id' => $attachmentId]);

@@ -13,10 +13,20 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->after('id')->constrained()->cascadeOnDelete();
         });
 
-        $firstUserId = DB::table('users')->value('id');
-        if ($firstUserId !== null) {
-            DB::table('tags')->whereNull('user_id')->update(['user_id' => $firstUserId]);
+        $legacyTagCount = DB::table('tags')->whereNull('user_id')->count();
+        if ($legacyTagCount > 0) {
+            $userIds = DB::table('users')->pluck('id');
+
+            if ($userIds->count() !== 1) {
+                throw new RuntimeException(
+                    'Cannot scope legacy tags automatically: resolve tag ownership and rerun this migration.',
+                );
+            }
+
+            DB::table('tags')->whereNull('user_id')->update(['user_id' => $userIds->first()]);
         }
+
+        DB::statement('ALTER TABLE tags ALTER COLUMN user_id SET NOT NULL');
     }
 
     public function down(): void

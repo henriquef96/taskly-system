@@ -1,27 +1,51 @@
 # Taskly — Spec Técnica
 
 ## 1. Domínio
-Gerenciador pessoal de tarefas: autenticação própria, projetos, tarefas com
-status, tags e anexos. Escopo completo em `.github/instructions/database.md`.
+
+Gerenciador de tarefas com autenticação, projetos, tarefas, status, tags,
+prazos e anexos privados.
 
 ## 2. Stack
-Backend: Laravel 13 + PostgreSQL + Sanctum.
-Frontend: React 19 + TypeScript + TanStack Query v5 + Tailwind v4.
-Ver `.github/instructions/architecture.md` para as regras de código aplicadas
-(thin controllers, Form Requests, Services, Policies).
+
+- Backend: PHP 8.4, Laravel 13, PostgreSQL e Sanctum.
+- Frontend: React 19, TypeScript, Vite, TanStack Query e Tailwind CSS.
+- Infraestrutura: Docker Compose, PHP-FPM e Nginx.
 
 ## 3. Contrato de API
-Especificação completa em `backend/docs/openapi.yaml`, servida via Swagger UI
-em `/docs`. Cobre auth, dashboard, projetos, tarefas, tags e anexos.
 
-## 4. Modelo de dados
-Definido em `.github/instructions/database.md`.
+O contrato está em `backend/docs/openapi.yaml` e é servido em `/docs`.
+Autenticação é stateful por sessão/cookie Sanctum e CSRF; não há token Bearer.
+Downloads de anexos usam binding aninhado:
 
-## 5. Decisões de UX além do mock de referência
-- Dashboard com visão geral dos projetos e tarefas.
-- Toggle Lista/Kanban persistido em localStorage.
-- Numeração de tickets (PJT-001/TRF-001) para rastreabilidade visual.
-- Configuração para troca/reset de senha.
+```text
+/api/tasks/{task}/attachments/{attachment}/download
+/api/projects/{project}/attachments/{attachment}/download
+```
 
-## 6. Testes
-Estratégia em `.github/instructions/testing.md`.
+## 4. Dados
+
+O modelo está detalhado em `.github/instructions/database.md`. Tags pertencem
+a um usuário; projetos, tarefas e anexos são protegidos por relacionamento e
+Policies.
+
+## 5. UX
+
+- Dashboard com visão geral.
+- Alternância Lista/Kanban persistida em localStorage.
+- Tickets numerados para rastreabilidade.
+- Anexos disponíveis na Lista, Kanban e edição/detalhe.
+- Login e cadastro responsivos.
+
+## 6. Segurança e operação
+
+- Rate limiting em login, cadastro e troca de senha.
+- Storage privado para anexos.
+- `APP_DEBUG=false` fora do desenvolvimento local.
+- Secrets fornecidos por ambiente/secret manager.
+- PostgreSQL sem porta pública no Compose.
+- Migrations executadas com `php artisan migrate --force`.
+
+## 7. Testes
+
+A estratégia está em `.github/instructions/testing.md`. A entrega deve validar
+backend, frontend, autorização, binding e contratos de API.

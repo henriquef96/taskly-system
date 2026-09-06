@@ -19,9 +19,11 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
   return data
 }
 
-export async function getCurrentUser(): Promise<UserResponse> {
-  const { data } = await httpClient.get<UserResponse>('/me')
-  return data
+export async function getCurrentUser(): Promise<UserResponse | null> {
+  const response = await httpClient.get<UserResponse>('/me', {
+    validateStatus: (status) => status === 200 || status === 401,
+  })
+  return response.status === 401 ? null : response.data
 }
 
 export async function logout(): Promise<void> {

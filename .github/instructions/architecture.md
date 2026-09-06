@@ -3,14 +3,14 @@
 ## Tech Stack
 
 ### Backend
-- **Linguagem / Framework:** PHP 8.4+ | Laravel 11+
+- **Linguagem / Framework:** PHP 8.4+ | Laravel 13+
 - **Banco de Dados:** PostgreSQL
-- **Autenticação:** Laravel Sanctum (SPA / API Tokens)
+- **Autenticação:** Laravel Sanctum stateful para SPA, com sessão/cookie e CSRF
 - **Comunicação:** API REST documentada e testada
 - **Respostas:** SEMPRE utilizar Laravel API Resources (`JsonResource`) para padronização de retornos JSON.
 
 ### Frontend
-- **Linguagem / Framework:** React 18+ | TypeScript (Tipagem estrita) | Vite | Tailwind CSS
+- **Linguagem / Framework:** React 19+ | TypeScript (Tipagem estrita) | Vite | Tailwind CSS
 - **Estado / Data Fetching:** TanStack Query (React Query) v5 + Axios
 - **Organização de Código:**
   - Tipos globais e interfaces da API em `src/types/`.

@@ -87,9 +87,7 @@ export function TaskCard({
         ))}
       </div>
 
-      {variant !== 'list' && (
-        <TaskAttachments projectId={projectId} taskId={task.id} attachments={task.attachments} />
-      )}
+      <TaskAttachments projectId={projectId} taskId={task.id} attachments={task.attachments} />
 
       <div className="mt-3 space-y-2">
         {isKanban && onStatusChange && (

@@ -1,18 +1,30 @@
 # Estratégia de Testes e Qualidade: Taskly
 
-## Diretrizes de Testes (Backend)
+## Backend
 
-- **Testes de Integração/Feature:** Toda nova funcionalidade, endpoint ou regra de negócio deve obrigatoriamente acompanhar seu respectivo teste usando **Pest PHP** ou **PHPUnit**.
-- **Cobertura Crítica:**
-  - Fluxos reais de endpoints da API REST.
-  - Validação de entrada de dados (`Form Requests`).
-  - Permissões de acesso e políticas de segurança (`Policies` e isolamento por `user_id`).
+Toda nova funcionalidade, endpoint ou regra de negócio deve ter teste PHPUnit.
+Priorize:
 
----
+- fluxos reais da API REST;
+- validação de Form Requests;
+- Policies e isolamento por `user_id`;
+- autorização e binding pai/filho em recursos aninhados;
+- migrations e contratos de anexos.
 
-## Execução do Ambiente
+## Frontend
 
-A execução e validação dos testes deve ser feita no container Docker do projeto:
+Componentes e fluxos críticos devem ter testes Vitest/Testing Library. O build
+deve validar TypeScript antes de gerar o bundle.
+
+## Execução
 
 ```bash
 docker compose exec app php artisan test
+docker compose exec app vendor/bin/pint --test
+cd frontend
+npm run build
+npm run lint
+npm run test
+```
+
+Testes backend usam SQLite em memória conforme `backend/phpunit.xml`.

@@ -144,8 +144,9 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/ProjectAttachmentResponse'}
         '422': {$ref: '#/components/responses/ValidationError'}
-  /api/project-attachments/{attachment}:
+  /api/projects/{project}/attachments/{attachment}:
     parameters:
+      - {$ref: '#/components/parameters/ProjectId'}
       - name: attachment
         in: path
         required: true
@@ -262,8 +263,9 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/AttachmentResponse'}
-  /api/attachments/{attachment}:
+  /api/tasks/{task}/attachments/{attachment}:
     parameters:
+      - {$ref: '#/components/parameters/TaskId'}
       - name: attachment
         in: path
         required: true
@@ -274,8 +276,9 @@ paths:
       summary: Delete a task attachment
       responses:
         '204': {description: Attachment deleted}
-  /api/attachments/{attachment}/download:
+  /api/tasks/{task}/attachments/{attachment}/download:
     parameters:
+      - {$ref: '#/components/parameters/TaskId'}
       - name: attachment
         in: path
         required: true
@@ -287,8 +290,9 @@ paths:
       responses:
         '200': {description: Attachment file}
         '403': {$ref: '#/components/responses/Forbidden'}
-  /api/project-attachments/{attachment}/download:
+  /api/projects/{project}/attachments/{attachment}/download:
     parameters:
+      - {$ref: '#/components/parameters/ProjectId'}
       - name: attachment
         in: path
         required: true

@@ -5,9 +5,11 @@ import type { Task, TaskInput } from '@/types/api'
 import { TASK_STATUS_VALUES, getTaskStatusLabel } from '@/types/api'
 import type { Tag } from '@/types/tags'
 import type { TaskFormValues } from '@/types/forms'
+import { TaskAttachments } from '@/components/tasks/TaskAttachments'
 
 interface TaskFormProps {
   task?: Task
+  projectId?: number
   isSubmitting: boolean
   serverError?: string
   onSubmit: (input: TaskInput) => void
@@ -18,7 +20,7 @@ interface TaskFormProps {
 
 const toDateInput = (value: string | null | undefined) => value ? value.slice(0, 16) : ''
 
-export function TaskForm({ task, isSubmitting, serverError, serverErrors = {}, onSubmit, onCancel, availableTags }: TaskFormProps) {
+export function TaskForm({ task, projectId, isSubmitting, serverError, serverErrors = {}, onSubmit, onCancel, availableTags }: TaskFormProps) {
   const { register, control, handleSubmit, reset, formState: { errors } } = useForm<TaskFormValues>({
     defaultValues: {
       title: task?.title ?? '',
@@ -87,14 +89,17 @@ export function TaskForm({ task, isSubmitting, serverError, serverErrors = {}, o
         name="tags"
         control={control}
         render={({ field }) => (
-          <TagSelector
-            availableTags={availableTags}
-            selectedTagIds={field.value}
-            onChange={field.onChange}
-            disabled={isSubmitting}
-          />
+          <>
+            <TagSelector
+              availableTags={availableTags}
+              selectedTagIds={field.value}
+              onChange={field.onChange}
+              disabled={isSubmitting}
+            />
+          </>
         )}
       />
+      {task && projectId && <TaskAttachments projectId={projectId} taskId={task.id} attachments={task.attachments} />}
       {serverErrors.tags?.map((message) => <p key={message} className="text-xs text-[var(--color-danger)]">{message}</p>)}
       {serverError && <p className="text-sm text-[var(--color-danger)]" role="alert">{serverError}</p>}
       <div className="flex justify-end gap-3">

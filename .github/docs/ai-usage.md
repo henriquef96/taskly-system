@@ -11,14 +11,14 @@ estão versionados em:
 - `.github/prompts/backend-prompts.md`
 - `.github/prompts/frontend-prompts.md`
 
-## Sessão de revisão de conformidade (Claude)
-Data: 05/09/2026
+## Sessão de revisão de conformidade
+Data: 06/09/2026
 
 | O que foi pedido | O que a IA gerou | Revisão crítica |
 |---|---|---|
-| Verificar conformidade do sistema | Levantamento comparando `routes/api.php`, frontend e funcionalidades com os requisitos do anúncio | Confirmado manualmente: rota `/api/tags` existe mas não estava documentada no OpenAPI (comentário em `tags.ts` estava desatualizado); visão em lista realmente ausente no Kanban |
-| Implementar toggle Lista/Kanban | Hook `useTaskViewPreference`, componentes `TaskViewToggle`/`TaskListView`, integração em `TaskManager` e `TasksPage` | Verificado que o Kanban permanece o default (não quebra `TaskManager.test.tsx` existente); teste novo adicionado para o toggle |
-| Atualizar `openapi.yaml` | Doc completo com rotas de dashboard/tags/anexos de projeto | Corrigido manualmente: schema `AuthResponse` do doc original citava campo `token` que a API não retorna (auth é via cookie de sessão) — removido para não documentar um contrato inexistente |
+| Verificar conformidade do sistema | Levantamento comparando `routes/api.php`, frontend, migrations e documentação | Confirmados e documentados: Sanctum stateful, rate limiting, storage privado, binding aninhado de anexos, `APP_DEBUG` seguro e banco sem porta pública |
+| Corrigir contrato de anexos | Rotas aninhadas, resources, chamadas frontend e testes de autorização/binding | Download e exclusão usam o recurso pai; usuário externo e attachment de outra tarefa são rejeitados |
+| Sincronizar documentação | README raiz, backend/frontend, spec e índice `.github` | Documentação agora reflete Laravel 13, React 19, scripts reais e roteiro de evidências |
 
 ## Limitações e cuidados
 - Todo código gerado por IA foi lido e testado localmente antes do commit.

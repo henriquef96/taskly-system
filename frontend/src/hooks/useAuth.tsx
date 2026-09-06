@@ -15,7 +15,7 @@ export function useCurrentUser() {
     queryFn: async (): Promise<User | null> => {
       try {
         const response = await authApi.getCurrentUser()
-        return response.user
+        return response?.user ?? null
       } catch (error: unknown) {
         if (error instanceof ApiError && error.status === 401) return null
         throw error

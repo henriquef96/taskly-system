@@ -42,8 +42,8 @@ export async function uploadProjectAttachment(projectId: number, file: File, onP
   return data.data
 }
 
-export async function deleteProjectAttachment(attachmentId: number): Promise<void> {
-  await httpClient.delete(`/project-attachments/${attachmentId}`)
+export async function deleteProjectAttachment(projectId: number, attachmentId: number): Promise<void> {
+  await httpClient.delete(`/projects/${projectId}/attachments/${attachmentId}`)
 }
 
 export async function listTags(): Promise<Collection<Tag>> {
@@ -93,6 +93,6 @@ export async function uploadTaskAttachment(
   return data.data
 }
 
-export async function deleteTaskAttachment(attachmentId: number): Promise<void> {
-  await httpClient.delete(`/attachments/${attachmentId}`)
+export async function deleteTaskAttachment(taskId: number, attachmentId: number): Promise<void> {
+  await httpClient.delete(`/tasks/${taskId}/attachments/${attachmentId}`)
 }

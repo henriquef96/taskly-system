@@ -28,17 +28,19 @@ class ProjectAttachmentController extends Controller
         return new ProjectAttachmentResource($this->service->store($project, $file));
     }
 
-    public function destroy(ProjectAttachment $attachment): Response
+    public function destroy(Project $project, ProjectAttachment $attachment): Response
     {
-        Gate::authorize('delete', $attachment->project);
+        Gate::authorize('delete', $project);
+        abort_unless($attachment->project_id === $project->id, 404);
         $this->service->delete($attachment);
 
         return response()->noContent();
     }
 
-    public function download(ProjectAttachment $attachment): BinaryFileResponse
+    public function download(Project $project, ProjectAttachment $attachment): BinaryFileResponse
     {
-        Gate::authorize('view', $attachment->project);
+        Gate::authorize('view', $project);
+        abort_unless($attachment->project_id === $project->id, 404);
 
         $disk = Storage::disk('local');
 

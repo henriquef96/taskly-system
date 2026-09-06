@@ -44,11 +44,29 @@ class OwnershipAndAttachmentTest extends TestCase
         Storage::disk('local')->put($attachment->file_path, 'content');
 
         $this->actingAs($otherUser, 'sanctum')
-            ->get("/api/attachments/{$attachment->id}/download")
+            ->get("/api/tasks/{$task->id}/attachments/{$attachment->id}/download")
             ->assertForbidden();
 
         $this->actingAs($user, 'sanctum')
-            ->get("/api/attachments/{$attachment->id}/download")
+            ->get("/api/tasks/{$task->id}/attachments/{$attachment->id}/download")
             ->assertDownload('manual.pdf');
+    }
+
+    public function test_task_attachment_binding_rejects_an_attachment_from_another_task(): void
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->create(['user_id' => $user->id]);
+        $task = Task::factory()->for($project)->create();
+        $otherTask = Task::factory()->for($project)->create();
+        $attachment = $otherTask->attachments()->create([
+            'file_path' => 'tasks/'.$otherTask->id.'/attachments/other.pdf',
+            'file_name' => 'other.pdf',
+            'mime_type' => 'application/pdf',
+            'file_size' => 10,
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->get("/api/tasks/{$task->id}/attachments/{$attachment->id}/download")
+            ->assertNotFound();
     }
 }

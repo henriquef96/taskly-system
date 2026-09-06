@@ -55,7 +55,7 @@ export function TaskManager({ projectId }: TaskManagerProps) {
         </div>
       </div>
       {actionError && <p className="text-sm text-[var(--color-danger)]" role="alert">{getApiErrorMessage(actionError, 'Não foi possível concluir a ação.')}</p>}
-      {(isCreating || editingTask) && <TaskForm task={editingTask} availableTags={availableTags} isSubmitting={createTask.isPending || updateTask.isPending} serverError={mutationError ? getApiErrorMessage(mutationError, 'Não foi possível salvar a tarefa.') : undefined} serverErrors={mutationError instanceof ApiError ? mutationError.errors : undefined} onSubmit={submit} onCancel={() => { setIsCreating(false); setEditingTask(undefined) }} />}
+      {(isCreating || editingTask) && <TaskForm projectId={projectId} task={editingTask} availableTags={availableTags} isSubmitting={createTask.isPending || updateTask.isPending} serverError={mutationError ? getApiErrorMessage(mutationError, 'Não foi possível salvar a tarefa.') : undefined} serverErrors={mutationError instanceof ApiError ? mutationError.errors : undefined} onSubmit={submit} onCancel={() => { setIsCreating(false); setEditingTask(undefined) }} />}
       {query.isLoading && <LoadingState label="Carregando tarefas..." />}
       {query.error && <ErrorState title="Não foi possível carregar as tarefas" message={getApiErrorMessage(query.error, 'Tente novamente em alguns instantes.')} onRetry={() => void query.refetch()} />}
       {!query.isLoading && !query.error && tasks.length === 0 && <EmptyState title="Nenhuma tarefa por aqui" message="Crie a primeira tarefa para começar a execução e acompanhar o progresso." />}
