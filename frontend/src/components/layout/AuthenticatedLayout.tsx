@@ -10,12 +10,22 @@ interface AuthenticatedLayoutProps extends PropsWithChildren {
 
 export function AuthenticatedLayout({ children, title, description, mainClassName }: AuthenticatedLayoutProps) {
   const [isSidebarOpen, setSidebarOpen] = useState(false)
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
-    <div className="min-h-svh bg-slate-50 text-slate-950">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="lg:pl-72">
-        <Header title={title} description={description} onMenuOpen={() => setSidebarOpen(true)} />
+    <div className="min-h-svh bg-[var(--color-background)] text-[var(--color-ink)]">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        isCollapsed={isSidebarCollapsed}
+        onClose={() => setSidebarOpen(false)}
+        onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
+      />
+      <div className={isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}>
+        <Header
+          title={title}
+          description={description}
+          onMenuOpen={() => setSidebarOpen(true)}
+        />
         <main className={`mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 ${mainClassName ?? ''}`}>{children}</main>
       </div>
     </div>

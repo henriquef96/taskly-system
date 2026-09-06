@@ -7,12 +7,12 @@ interface TaskViewToggleProps {
 
 export function TaskViewToggle({ view, onChange }: TaskViewToggleProps) {
   return (
-    <div role="group" aria-label="Alternar visualização de tarefas" className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+    <div role="group" aria-label="Alternar visualização de tarefas" className="inline-flex items-center gap-1 rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] p-1 shadow-sm backdrop-blur-sm">
       <button
         type="button"
         onClick={() => onChange('list')}
         aria-pressed={view === 'list'}
-        className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition ${view === 'list' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-100'}`}
+        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${view === 'list' ? 'bg-[rgba(103,242,255,0.12)] text-[var(--color-primary)]' : 'text-[var(--color-muted)] hover:bg-[var(--color-surface)]'}`}
       >
         <span aria-hidden="true">≡</span>
         Lista
@@ -21,7 +21,7 @@ export function TaskViewToggle({ view, onChange }: TaskViewToggleProps) {
         type="button"
         onClick={() => onChange('kanban')}
         aria-pressed={view === 'kanban'}
-        className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition ${view === 'kanban' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-100'}`}
+        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${view === 'kanban' ? 'bg-[rgba(103,242,255,0.12)] text-[var(--color-primary)]' : 'text-[var(--color-muted)] hover:bg-[var(--color-surface)]'}`}
       >
         <span aria-hidden="true">⊞</span>
         Kanban

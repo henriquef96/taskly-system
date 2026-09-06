@@ -6,11 +6,11 @@ interface ErrorStateProps {
 
 export function ErrorState({ title, message, onRetry }: ErrorStateProps) {
   return (
-    <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-800" role="alert">
-      <h2 className="font-semibold">{title}</h2>
-      <p className="mt-1 text-sm">{message}</p>
+    <div className="rounded-[1.5rem] border border-[rgba(255,127,127,0.22)] bg-[rgba(255,127,127,0.08)] p-6 text-[var(--color-ink)]" role="alert">
+      <h2 className="text-lg font-semibold text-[var(--color-ink)]">{title}</h2>
+      <p className="mt-2 max-w-[32rem] text-sm leading-6 text-[var(--color-muted)]">{message}</p>
       {onRetry && (
-        <button type="button" onClick={onRetry} className="mt-4 rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500">
+        <button type="button" onClick={onRetry} className="mt-4 rounded-full border border-[rgba(255,127,127,0.3)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-primary)] hover:bg-[rgba(103,242,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]">
           Tentar novamente
         </button>
       )}

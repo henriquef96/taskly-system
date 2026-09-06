@@ -15,13 +15,13 @@ export function TagSelector({ availableTags, selectedTagIds, onChange, disabled 
 
   return (
     <fieldset disabled={disabled} className="space-y-2">
-      <legend className="text-sm font-medium text-slate-700">Tags</legend>
+      <legend className="text-sm font-medium text-[var(--color-ink)]">Tags</legend>
       {availableTags.length > 0 ? (
         <select
           multiple
           value={selectedTagIds.map(String)}
           onChange={handleChange}
-          className="min-h-28 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          className="min-h-28 w-full rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[rgba(103,242,255,0.12)]"
           aria-label="Tags da tarefa"
         >
           {availableTags.map((tag) => (
@@ -29,7 +29,7 @@ export function TagSelector({ availableTags, selectedTagIds, onChange, disabled 
           ))}
         </select>
       ) : (
-        <p className="text-xs text-slate-500">Nenhuma tag cadastrada.</p>
+        <p className="text-xs text-[var(--color-muted)]">Nenhuma tag cadastrada.</p>
       )}
     </fieldset>
   )

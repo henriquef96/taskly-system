@@ -19,6 +19,7 @@ export function ProjectDetailPage() {
   const deleteProject = useDeleteProject()
   const project = projectQuery.data
   const [isEditing, setIsEditing] = useState(false)
+  const hasDeleteError = Boolean(deleteProject.error)
 
   if (!Number.isInteger(parsedProjectId) || parsedProjectId <= 0) {
     return <ErrorState title="Projeto inválido" message="O projeto solicitado não foi encontrado." />
@@ -36,12 +37,12 @@ export function ProjectDetailPage() {
   return (
     <AuthenticatedLayout title={project?.name ?? 'Projeto'} description="Gerencie as informações e tarefas deste projeto.">
       <div className="mb-5 flex items-center justify-between">
-        <Link to="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">← Voltar aos projetos</Link>
-        {project && <button type="button" onClick={handleDelete} disabled={deleteProject.isPending} className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60">Excluir projeto</button>}
+        <Link to="/dashboard" className="text-sm font-medium text-[var(--color-primary-strong)] hover:text-[var(--color-primary)]">← Voltar aos projetos</Link>
+        {project && <button type="button" onClick={handleDelete} disabled={deleteProject.isPending} className="rounded-full border border-[rgba(255,127,127,0.2)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-danger)] hover:bg-[rgba(255,127,127,0.08)] disabled:opacity-60">Excluir projeto</button>}
       </div>
       {projectQuery.isLoading && <LoadingState label="Carregando projeto..." />}
       {projectQuery.error && <ErrorState title="Não foi possível carregar o projeto" message={getApiErrorMessage(projectQuery.error, 'Tente novamente em alguns instantes.')} onRetry={() => void projectQuery.refetch()} />}
-      {deleteProject.error && <p className="mb-4 text-sm text-red-600" role="alert">{getApiErrorMessage(deleteProject.error, 'Não foi possível excluir o projeto.')}</p>}
+      {hasDeleteError && <p className="mb-4 text-sm text-[var(--color-danger)]" role="alert">{getApiErrorMessage(deleteProject.error, 'Não foi possível excluir o projeto.')}</p>}
       {project && (
         <ProjectForm
           project={project}

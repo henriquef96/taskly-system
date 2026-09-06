@@ -48,6 +48,24 @@ describe('TaskManager', () => {
     expect(screen.getByText('Não iniciada')).toBeInTheDocument()
   })
 
+  it('altera o status pelo seletor no kanban e move o card por arrastar', () => {
+    render(<TestProviders><TaskManager projectId={project.id} /></TestProviders>)
+
+    fireEvent.change(screen.getByRole('combobox', { name: `Status da tarefa ${task.title}` }), {
+      target: { value: 'in_progress' },
+    })
+    expect(statusMutate).toHaveBeenCalledWith({ taskId: task.id, status: 'in_progress' })
+
+    const card = screen.getByText(task.title).closest('article')
+    const completedColumn = screen.getByRole('heading', { name: /Concluída/ }).parentElement
+    expect(card).not.toBeNull()
+    expect(completedColumn).not.toBeNull()
+
+    fireEvent.dragStart(card as HTMLElement)
+    fireEvent.drop(completedColumn as HTMLElement)
+    expect(statusMutate).toHaveBeenCalledWith({ taskId: task.id, status: 'completed' })
+  })
+
   it('exibe loading, erro e estado vazio', () => {
     taskState = { data: undefined, isLoading: true, error: null, refetch: vi.fn() }
     const { rerender } = render(<TestProviders><TaskManager projectId={project.id} /></TestProviders>)

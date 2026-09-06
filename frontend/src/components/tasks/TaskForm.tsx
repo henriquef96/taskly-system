@@ -56,31 +56,31 @@ export function TaskForm({ task, isSubmitting, serverError, serverErrors = {}, o
   }
 
   return (
-    <form onSubmit={(event) => void handleSubmit(submit)(event)} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <form onSubmit={(event) => void handleSubmit(submit)(event)} className="space-y-4 rounded-[1.75rem] border border-[var(--color-line)] bg-[var(--color-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur-sm">
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="text-sm font-medium text-slate-700">Título
-          <input id="task-title" aria-invalid={Boolean(errors.title || serverErrors.title)} aria-describedby={errors.title || serverErrors.title ? 'task-title-error' : undefined} {...register('title', { required: 'Informe o título', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
-          {(errors.title || serverErrors.title) && <span id="task-title-error" className="mt-1 block text-xs text-red-600">{errors.title?.message ?? serverErrors.title?.join(' ')}</span>}
+        <label className="text-sm font-medium text-[var(--color-ink)]">Título
+          <input id="task-title" aria-invalid={Boolean(errors.title || serverErrors.title)} aria-describedby={errors.title || serverErrors.title ? 'task-title-error' : undefined} {...register('title', { required: 'Informe o título', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 font-normal text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[rgba(103,242,255,0.12)]" />
+          {(errors.title || serverErrors.title) && <span id="task-title-error" className="mt-1 block text-xs text-[var(--color-danger)]">{errors.title?.message ?? serverErrors.title?.join(' ')}</span>}
         </label>
-        <label className="text-sm font-medium text-slate-700">Descrição curta
-          <input id="task-short-description" aria-invalid={Boolean(errors.short_description || serverErrors.short_description)} aria-describedby={errors.short_description || serverErrors.short_description ? 'task-short-description-error' : undefined} {...register('short_description', { required: 'Informe a descrição curta', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
-          {(errors.short_description || serverErrors.short_description) && <span id="task-short-description-error" className="mt-1 block text-xs text-red-600">{errors.short_description?.message ?? serverErrors.short_description?.join(' ')}</span>}
+        <label className="text-sm font-medium text-[var(--color-ink)]">Descrição curta
+          <input id="task-short-description" aria-invalid={Boolean(errors.short_description || serverErrors.short_description)} aria-describedby={errors.short_description || serverErrors.short_description ? 'task-short-description-error' : undefined} {...register('short_description', { required: 'Informe a descrição curta', maxLength: { value: 255, message: 'Use no máximo 255 caracteres' } })} className="mt-1 w-full rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 font-normal text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[rgba(103,242,255,0.12)]" />
+          {(errors.short_description || serverErrors.short_description) && <span id="task-short-description-error" className="mt-1 block text-xs text-[var(--color-danger)]">{errors.short_description?.message ?? serverErrors.short_description?.join(' ')}</span>}
         </label>
       </div>
-      <label className="block text-sm font-medium text-slate-700">Descrição completa
-        <textarea {...register('full_description')} rows={3} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal outline-none focus:border-indigo-500" />
+      <label className="block text-sm font-medium text-[var(--color-ink)]">Descrição completa
+        <textarea {...register('full_description')} rows={3} className="mt-1 w-full rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 font-normal text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[rgba(103,242,255,0.12)]" />
       </label>
       <div className="grid gap-4 sm:grid-cols-3">
-        <label className="text-sm font-medium text-slate-700">Prazo
-          <input type="datetime-local" {...register('due_date')} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal" />
+        <label className="text-sm font-medium text-[var(--color-ink)]">Prazo
+          <input type="datetime-local" {...register('due_date')} className="mt-1 w-full rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 font-normal text-[var(--color-ink)]" />
         </label>
-        <label className="text-sm font-medium text-slate-700">Status
-          <select {...register('status')} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-normal">
+        <label className="text-sm font-medium text-[var(--color-ink)]">Status
+          <select {...register('status')} className="mt-1 w-full rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 font-normal text-[var(--color-ink)]">
             {TASK_STATUS_VALUES.map((status) => <option key={status} value={status}>{getTaskStatusLabel(status)}</option>)}
           </select>
         </label>
-        <label className="text-sm font-medium text-slate-700">Posição
-          <input type="number" min="0" {...register('position', { valueAsNumber: true, min: 0 })} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal" />
+        <label className="text-sm font-medium text-[var(--color-ink)]">Posição
+          <input type="number" min="0" {...register('position', { valueAsNumber: true, min: 0 })} className="mt-1 w-full rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2.5 font-normal text-[var(--color-ink)]" />
         </label>
       </div>
       <Controller
@@ -95,11 +95,11 @@ export function TaskForm({ task, isSubmitting, serverError, serverErrors = {}, o
           />
         )}
       />
-      {serverErrors.tags?.map((message) => <p key={message} className="text-xs text-red-600">{message}</p>)}
-      {serverError && <p className="text-sm text-red-600" role="alert">{serverError}</p>}
+      {serverErrors.tags?.map((message) => <p key={message} className="text-xs text-[var(--color-danger)]">{message}</p>)}
+      {serverError && <p className="text-sm text-[var(--color-danger)]" role="alert">{serverError}</p>}
       <div className="flex justify-end gap-3">
-        <button type="button" onClick={onCancel} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">Cancelar</button>
-        <button type="submit" disabled={isSubmitting} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60">{isSubmitting ? 'Salvando...' : task ? 'Salvar tarefa' : 'Criar tarefa'}</button>
+        <button type="button" onClick={onCancel} className="brand-button-secondary px-4 py-2 text-sm">Cancelar</button>
+        <button type="submit" disabled={isSubmitting} className="brand-button px-4 py-2 text-sm disabled:opacity-60">{isSubmitting ? 'Salvando...' : task ? 'Salvar tarefa' : 'Criar tarefa'}</button>
       </div>
     </form>
   )

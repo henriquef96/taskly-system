@@ -4,22 +4,15 @@ import type { Task } from '@/types/api'
 
 interface TaskListViewProps {
   tasks: Task[]
-  onStatusChange: (
-    taskId: number,
-    status: Task['status']
-  ) => void
   onEdit: (task: Task) => void
   onDelete: (task: Task) => void
-  isStatusUpdating?: boolean
   isDeleting?: boolean
 }
 
 export function TaskListView({
   tasks,
-  onStatusChange,
   onEdit,
   onDelete,
-  isStatusUpdating = false,
   isDeleting = false,
 }: TaskListViewProps) {
   const sortedTasks = [...tasks].sort(
@@ -28,8 +21,8 @@ export function TaskListView({
 
   if (sortedTasks.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
-        Nenhuma tarefa por aqui.
+      <p className="rounded-[1.5rem] border border-dashed border-[var(--color-line)] bg-[var(--color-panel)] p-6 text-center text-sm text-[var(--color-muted)] backdrop-blur-sm">
+        Nenhuma tarefa em andamento. Crie a primeira para começar.
       </p>
     )
   }
@@ -44,10 +37,8 @@ export function TaskListView({
           <TaskCard
             task={task}
             projectId={task.project_id}
-            onStatusChange={onStatusChange}
             onEdit={onEdit}
             onDelete={onDelete}
-            isStatusUpdating={isStatusUpdating}
             isDeleting={isDeleting}
             variant="list"
           />
