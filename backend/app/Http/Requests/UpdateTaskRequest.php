@@ -24,7 +24,11 @@ class UpdateTaskRequest extends FormRequest
             'status' => ['sometimes', Rule::enum(TaskStatus::class)],
             'position' => ['sometimes', 'integer', 'min:0'],
             'tags' => ['sometimes', 'array'],
-            'tags.*' => ['integer', 'distinct', 'exists:tags,id'],
+            'tags.*' => [
+                'integer',
+                'distinct',
+                Rule::exists('tags', 'id')->where('user_id', $this->user()?->id),
+            ],
         ];
     }
 }

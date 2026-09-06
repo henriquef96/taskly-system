@@ -2,7 +2,7 @@
 
 Projeto Full-Stack de acompanhamento e gerenciamento de atividades.
 
-Backend: Laravel (API REST) + PostgreSQL.
+Backend: Laravel 13 (API REST) + PostgreSQL.
 Frontend: React + TypeScript + Tailwind CSS + Vite.
 Infraestrutura: Container Docker, Docker Compose.
 
@@ -35,6 +35,9 @@ docker compose exec app php artisan test
 ```
 
 Os testes usam SQLite em memória e cobrem cadastro, login, autenticação, isolamento de projetos e o ciclo de vida de tarefas.
+
+Os anexos possuem download protegido por autorização. Tags são específicas do usuário
+e não podem ser associadas a tarefas de outro usuário.
 
 ### Testando pelo Postman
 

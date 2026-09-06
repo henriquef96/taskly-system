@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Enums\TaskStatus;
 use App\Models\Project;
-use App\Models\Tag;
 use App\Models\Task;
 use Illuminate\Database\Seeder;
 
@@ -12,7 +11,6 @@ class TaskSeeder extends Seeder
 {
     public function run(): void
     {
-        $tagIds = Tag::pluck('id');
         $projects = Project::query()->get();
         $statuses = [
             TaskStatus::Pending,
@@ -30,6 +28,7 @@ class TaskSeeder extends Seeder
                 'project_id' => $projects[$index % $projects->count()]->id,
                 'status' => $status,
             ]);
+            $tagIds = $task->project->owner->tags()->pluck('tags.id');
 
             $tagsToAttach = fake()->numberBetween(0, min(3, $tagIds->count()));
 

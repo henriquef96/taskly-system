@@ -90,6 +90,36 @@ class ApiEndpointsTest extends TestCase
         $this->assertGuest('web');
     }
 
+    public function test_authenticated_user_can_change_their_password_with_the_current_password(): void
+    {
+        $user = User::factory()->create(['password' => 'Senha@123']);
+
+        $this->actingAs($user, 'web')
+            ->patchJson('/api/password', [
+                'current_password' => 'Senha@123',
+                'password' => 'NovaSenha@456',
+                'password_confirmation' => 'NovaSenha@456',
+            ])
+            ->assertOk()
+            ->assertJson(['message' => 'Senha alterada com sucesso.']);
+
+        $this->assertTrue(password_verify('NovaSenha@456', $user->refresh()->password));
+    }
+
+    public function test_password_change_rejects_an_incorrect_current_password(): void
+    {
+        $user = User::factory()->create(['password' => 'Senha@123']);
+
+        $this->actingAs($user, 'web')
+            ->patchJson('/api/password', [
+                'current_password' => 'senha-incorreta',
+                'password' => 'NovaSenha@456',
+                'password_confirmation' => 'NovaSenha@456',
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['current_password']);
+    }
+
     public function test_authenticated_user_can_read_their_projects_and_cannot_read_another_users_project(): void
     {
         $user = User::factory()->create();

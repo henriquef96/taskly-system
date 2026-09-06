@@ -115,12 +115,28 @@ export function useUpdateTask(projectId: number) {
   })
 }
 
-export function useDeleteTask(projectId: number) {
+type DeleteTaskVariables = number | { projectId: number; taskId: number }
+
+export function useDeleteTask(projectId?: number) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (taskId: number) => projectsApi.deleteTask(projectId, taskId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'tasks'] })
+    mutationFn: (variables: DeleteTaskVariables) => {
+      const target = typeof variables === 'number'
+        ? { projectId, taskId: variables }
+        : variables
+
+      if (!target.projectId) {
+        throw new Error('O projeto da tarefa é obrigatório para excluí-la.')
+      }
+
+      return projectsApi.deleteTask(target.projectId, target.taskId)
+    },
+    onSuccess: (_data, variables) => {
+      const targetProjectId = typeof variables === 'number' ? projectId : variables.projectId
+
+      if (targetProjectId) {
+        void queryClient.invalidateQueries({ queryKey: ['projects', targetProjectId, 'tasks'] })
+      }
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })

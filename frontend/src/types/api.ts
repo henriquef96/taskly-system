@@ -51,11 +51,13 @@ export function isTaskStatus(value: string): value is TaskStatus {
 
 export interface Attachment {
   id: number
-  task_id: number
+  task_id?: number
+  project_id?: number
   file_path: string
   file_name: string
   mime_type: string
   file_size: number
+  download_url: string
   created_at?: string
   updated_at?: string
 }

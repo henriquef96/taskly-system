@@ -4,7 +4,7 @@ import * as authApi from '@/api/auth'
 import { AuthContext } from '@/auth/AuthContext'
 import { ApiError } from '@/api/ApiError'
 import type { User } from '@/types/api'
-import type { LoginInput, RegisterInput } from '@/types/auth'
+import type { ChangePasswordInput, LoginInput, RegisterInput } from '@/types/auth'
 
 export const currentUserQueryKey = ['auth', 'current-user'] as const
 
@@ -55,6 +55,12 @@ export function useLogout() {
       queryClient.setQueryData(currentUserQueryKey, null)
       queryClient.clear()
     },
+  })
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (input: ChangePasswordInput) => authApi.changePassword(input),
   })
 }
 

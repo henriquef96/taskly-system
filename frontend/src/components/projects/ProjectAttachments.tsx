@@ -36,7 +36,7 @@ export function ProjectAttachments({ projectId, attachments = [] }: ProjectAttac
         <input ref={inputRef} type="file" className="sr-only" accept={ACCEPTED_EXTENSIONS.map((extension) => `.${extension}`).join(',')} onChange={(event) => { handleFile(event.target.files?.[0]); event.target.value = '' }} />
       </div>
       {(error || upload.error || remove.error) && <p className="mt-2 text-xs text-red-600" role="alert">{error ?? getApiErrorMessage(upload.error ?? remove.error, 'Não foi possível atualizar os anexos.')}</p>}
-      {attachments.length > 0 && <ul className="mt-2 space-y-1">{attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-2 text-xs text-slate-600"><span className="truncate">{attachment.file_name}</span><button type="button" onClick={() => { if (window.confirm(`Excluir o anexo "${attachment.file_name}"?`)) remove.mutate(attachment.id) }} className="shrink-0 text-red-600">Excluir</button></li>)}</ul>}
+      {attachments.length > 0 && <ul className="mt-2 space-y-1">{attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-2 text-xs text-slate-600"><a href={attachment.download_url} className="truncate text-indigo-600 hover:underline">{attachment.file_name}</a><button type="button" onClick={() => { if (window.confirm(`Excluir o anexo "${attachment.file_name}"?`)) remove.mutate(attachment.id) }} className="shrink-0 text-red-600">Excluir</button></li>)}</ul>}
       {attachments.length === 0 && <p className="mt-2 text-xs text-slate-500">Nenhum anexo.</p>}
     </div>
   )

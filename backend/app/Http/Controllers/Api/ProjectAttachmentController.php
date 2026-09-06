@@ -12,6 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProjectAttachmentController extends Controller
 {
@@ -32,5 +34,18 @@ class ProjectAttachmentController extends Controller
         $this->service->delete($attachment);
 
         return response()->noContent();
+    }
+
+    public function download(ProjectAttachment $attachment): BinaryFileResponse
+    {
+        Gate::authorize('view', $attachment->project);
+
+        $disk = Storage::disk('local');
+
+        return response()->download(
+            $disk->path($attachment->file_path),
+            $attachment->file_name,
+            ['Content-Type' => $attachment->mime_type],
+        );
     }
 }

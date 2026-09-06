@@ -17,8 +17,10 @@ use App\Services\TaskAttachmentService;
 use App\Services\TaskService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
@@ -95,5 +97,18 @@ class TaskController extends Controller
         $this->taskAttachmentService->delete($attachment);
 
         return response()->noContent();
+    }
+
+    public function downloadAttachment(TaskAttachment $attachment): BinaryFileResponse
+    {
+        Gate::authorize('view', $attachment->task);
+
+        $disk = Storage::disk('local');
+
+        return response()->download(
+            $disk->path($attachment->file_path),
+            $attachment->file_name,
+            ['Content-Type' => $attachment->mime_type],
+        );
     }
 }

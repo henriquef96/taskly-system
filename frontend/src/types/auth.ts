@@ -16,6 +16,12 @@ export interface LoginInput extends LoginRequest {}
 
 export interface RegisterInput extends RegisterRequest {}
 
+export interface ChangePasswordInput {
+  current_password: string
+  password: string
+  password_confirmation: string
+}
+
 export interface AuthContextValue {
   user: User | null
   isLoading: boolean

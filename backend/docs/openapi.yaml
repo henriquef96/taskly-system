@@ -233,7 +233,7 @@ paths:
       tags: [Tags]
       security: [{sanctum: []}]
       summary: List available tags
-      description: Returns the fixed set of tags available to attach to tasks. Tags are shared across all users (not user-scoped).
+      description: Returns the authenticated user's tags available to attach to tasks.
       responses:
         '200':
           description: Tag collection
@@ -274,12 +274,39 @@ paths:
       summary: Delete a task attachment
       responses:
         '204': {description: Attachment deleted}
+  /api/attachments/{attachment}/download:
+    parameters:
+      - name: attachment
+        in: path
+        required: true
+        schema: {type: integer}
+    get:
+      tags: [Attachments]
+      security: [{sanctum: []}]
+      summary: Download a task attachment
+      responses:
+        '200': {description: Attachment file}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /api/project-attachments/{attachment}/download:
+    parameters:
+      - name: attachment
+        in: path
+        required: true
+        schema: {type: integer}
+    get:
+      tags: [Attachments]
+      security: [{sanctum: []}]
+      summary: Download a project attachment
+      responses:
+        '200': {description: Attachment file}
+        '403': {$ref: '#/components/responses/Forbidden'}
 components:
   securitySchemes:
     sanctum:
-      type: http
-      scheme: bearer
-      bearerFormat: token
+      type: apiKey
+      in: cookie
+      name: taskly-system-session
+      description: Laravel Sanctum stateful session cookie. Obtain XSRF-TOKEN before state-changing requests.
   parameters:
     ProjectId:
       name: project
@@ -342,6 +369,7 @@ components:
         color: {type: string, description: "Hex color used to render the tag badge."}
     TaskRequest:
       type: object
+      required: [title, short_description]
       properties:
         title: {type: string, maxLength: 255}
         short_description: {type: string, maxLength: 255}
@@ -377,6 +405,7 @@ components:
         file_name: {type: string}
         mime_type: {type: string}
         file_size: {type: integer}
+        download_url: {type: string, format: uri}
     ProjectAttachment:
       type: object
       properties:
@@ -386,6 +415,7 @@ components:
         file_name: {type: string}
         mime_type: {type: string}
         file_size: {type: integer}
+        download_url: {type: string, format: uri}
     DashboardData:
       type: object
       description: Consolidated data for the overview page, scoped to the authenticated user.

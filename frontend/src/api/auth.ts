@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { httpClient } from '@/api/httpClient'
 import type { AuthResponse, UserResponse } from '@/types/api'
-import type { LoginInput, RegisterInput } from '@/types/auth'
+import type { ChangePasswordInput, LoginInput, RegisterInput } from '@/types/auth'
 
 async function initializeCsrfCookie(): Promise<void> {
   await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
@@ -26,4 +26,8 @@ export async function getCurrentUser(): Promise<UserResponse> {
 
 export async function logout(): Promise<void> {
   await httpClient.post('/logout')
+}
+
+export async function changePassword(input: ChangePasswordInput): Promise<void> {
+  await httpClient.patch('/password', input)
 }

@@ -23,6 +23,22 @@ export const registerSchema = z.object({
 export type LoginFormValues = z.infer<typeof loginSchema>
 export type RegisterFormValues = z.infer<typeof registerSchema>
 
+export const changePasswordSchema = z.object({
+  current_password: z.string().min(1, 'Informe sua senha atual'),
+  password: z.string()
+    .min(8, 'A senha deve ter pelo menos 8 caracteres')
+    .regex(/[a-z]/, 'A senha deve conter uma letra minúscula')
+    .regex(/[A-Z]/, 'A senha deve conter uma letra maiúscula')
+    .regex(/[0-9]/, 'A senha deve conter um número')
+    .regex(/[^a-zA-Z0-9]/, 'A senha deve conter um símbolo'),
+  password_confirmation: z.string().min(1, 'Confirme sua nova senha'),
+}).refine((value) => value.password === value.password_confirmation, {
+  message: 'As senhas precisam ser iguais',
+  path: ['password_confirmation'],
+})
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>
+
 export interface ProjectFormValues {
   name: string
   description: string

@@ -45,6 +45,7 @@ describe('TaskManager', () => {
     expect(screen.getByRole('button', { name: 'Lista', pressed: true })).toBeInTheDocument()
     expect(screen.getByRole('list', { name: 'Lista de tarefas ordenada por posição' })).toBeInTheDocument()
     expect(screen.getByText(task.title)).toBeInTheDocument()
+    expect(screen.getByText('Não iniciada')).toBeInTheDocument()
   })
 
   it('exibe loading, erro e estado vazio', () => {

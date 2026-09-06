@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Resources\UserResource;
+use App\Services\ChangePasswordService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,9 +23,7 @@ class AuthController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
-        return response()->json([
-            'user' => $user,
-        ], 201);
+        return (new UserResource($user))->response()->setStatusCode(201);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -39,16 +40,12 @@ class AuthController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
-        return response()->json([
-            'user' => $user,
-        ]);
+        return (new UserResource($user))->response();
     }
 
-    public function me(Request $request): JsonResponse
+    public function me(Request $request): UserResource
     {
-        return response()->json([
-            'user' => $request->user(),
-        ]);
+        return new UserResource($request->user());
     }
 
     public function logout(Request $request): JsonResponse
@@ -63,6 +60,15 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logout realizado com sucesso.',
+        ]);
+    }
+
+    public function updatePassword(ChangePasswordRequest $request, ChangePasswordService $changePassword): JsonResponse
+    {
+        $changePassword->execute($request->user(), $request->string('password')->toString());
+
+        return response()->json([
+            'message' => 'Senha alterada com sucesso.',
         ]);
     }
 }

@@ -62,7 +62,7 @@ export function TaskAttachments({ projectId, taskId, attachments }: TaskAttachme
       {attachments && attachments.length > 0 && (
         <ul className="mt-2 space-y-1">
           {attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-2 text-xs text-slate-600">
-            <span className="min-w-0 truncate" title={attachment.file_name}>{attachment.file_name} <span className="text-slate-400">({attachment.mime_type}, {formatFileSize(attachment.file_size)})</span></span>
+            <a href={attachment.download_url} className="min-w-0 truncate text-indigo-600 hover:underline" title={attachment.file_name}>{attachment.file_name} <span className="text-slate-400">({attachment.mime_type}, {formatFileSize(attachment.file_size)})</span></a>
             <button type="button" onClick={() => { if (window.confirm(`Excluir o anexo "${attachment.file_name}"?`)) remove.mutate(attachment.id) }} disabled={remove.isPending} className="shrink-0 text-red-600 disabled:opacity-60">Excluir</button>
           </li>)}
         </ul>

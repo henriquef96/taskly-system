@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $order = ['Desenvolvimento', 'Revisão', 'Documentação', 'Deploy'];
         $bindings = [];
@@ -20,7 +21,10 @@ class TagController extends Controller
         })->implode(' ');
 
         return TagResource::collection(
-            Tag::query()->orderByRaw("CASE name {$case} ELSE 999 END", $bindings)->get(),
+            Tag::query()
+                ->where('user_id', $request->user()->id)
+                ->orderByRaw("CASE name {$case} ELSE 999 END", $bindings)
+                ->get(),
         );
     }
 }

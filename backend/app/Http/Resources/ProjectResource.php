@@ -17,8 +17,8 @@ class ProjectResource extends JsonResource
             'description' => $this->description,
             'status' => $this->status?->value,
             'user_id' => $this->user_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
             'attachments' => ProjectAttachmentResource::collection($this->whenLoaded('attachments')),
         ];
     }
