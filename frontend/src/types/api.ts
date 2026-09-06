@@ -23,7 +23,7 @@ export interface Project {
 }
 
 export function formatProjectTicket(ticketNumber: number): string {
-  return `PJT-${String(ticketNumber).padStart(3, '0')}`
+  return `PR-${String(ticketNumber).padStart(3, '0')}`
 }
 
 export const TASK_STATUS_VALUES = ['pending', 'in_progress', 'completed', 'cancelled'] as const
@@ -42,7 +42,7 @@ export function getTaskStatusLabel(status: TaskStatus): string {
 }
 
 export function formatTaskTicket(ticketNumber: number): string {
-  return `TRF-${String(ticketNumber).padStart(3, '0')}`
+  return `TR-${String(ticketNumber).padStart(3, '0')}`
 }
 
 export function isTaskStatus(value: string): value is TaskStatus {

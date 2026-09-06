@@ -8,8 +8,10 @@ servers:
     description: Local Docker environment
 tags:
   - name: Authentication
+  - name: Dashboard
   - name: Projects
   - name: Tasks
+  - name: Tags
   - name: Attachments
 paths:
   /api/register:
@@ -53,9 +55,18 @@ paths:
     post:
       tags: [Authentication]
       security: [{sanctum: []}]
-      summary: Revoke the current token
+      summary: Revoke the current session/token
       responses:
-        '200': {description: Token revoked}
+        '200': {description: Logout successful}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /api/dashboard:
+    get:
+      tags: [Dashboard]
+      security: [{sanctum: []}]
+      summary: Get consolidated dashboard data for the authenticated user
+      description: Returns the user's projects (with task counts) and all tasks across those projects, used to power the overview and Kanban/list task board.
+      responses:
+        '200': {$ref: '#/components/responses/DashboardResponse'}
         '401': {$ref: '#/components/responses/Unauthorized'}
   /api/projects:
     get:
@@ -109,6 +120,42 @@ paths:
       summary: Delete a project and its tasks
       responses:
         '204': {description: Project deleted}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /api/projects/{project}/attachments:
+    parameters:
+      - {$ref: '#/components/parameters/ProjectId'}
+    post:
+      tags: [Attachments]
+      security: [{sanctum: []}]
+      summary: Upload a project attachment
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: {type: string, format: binary}
+      responses:
+        '201':
+          description: Attachment uploaded
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProjectAttachmentResponse'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /api/project-attachments/{attachment}:
+    parameters:
+      - name: attachment
+        in: path
+        required: true
+        schema: {type: integer}
+    delete:
+      tags: [Attachments]
+      security: [{sanctum: []}]
+      summary: Delete a project attachment
+      responses:
+        '204': {description: Attachment deleted}
         '403': {$ref: '#/components/responses/Forbidden'}
   /api/projects/{project}/tasks:
     parameters:
@@ -181,6 +228,18 @@ paths:
                 status: {$ref: '#/components/schemas/TaskStatus'}
       responses:
         '200': {$ref: '#/components/responses/TaskResponse'}
+  /api/tags:
+    get:
+      tags: [Tags]
+      security: [{sanctum: []}]
+      summary: List available tags
+      description: Returns the fixed set of tags available to attach to tasks. Tags are shared across all users (not user-scoped).
+      responses:
+        '200':
+          description: Tag collection
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TagCollection'}
   /api/tasks/{task}/attachments:
     parameters:
       - {$ref: '#/components/parameters/TaskId'}
@@ -212,7 +271,7 @@ paths:
     delete:
       tags: [Attachments]
       security: [{sanctum: []}]
-      summary: Delete an attachment
+      summary: Delete a task attachment
       responses:
         '204': {description: Attachment deleted}
 components:
@@ -265,12 +324,22 @@ components:
         - type: object
           properties:
             id: {type: integer}
+            ticket_number: {type: integer, description: "Sequential display number, formatted as PJT-000 on the frontend."}
             user_id: {type: integer}
+            attachments:
+              type: array
+              items: {$ref: '#/components/schemas/ProjectAttachment'}
             created_at: {type: string, format: date-time}
             updated_at: {type: string, format: date-time}
     TaskStatus:
       type: string
       enum: [pending, in_progress, completed, cancelled]
+    Tag:
+      type: object
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        color: {type: string, description: "Hex color used to render the tag badge."}
     TaskRequest:
       type: object
       properties:
@@ -289,7 +358,11 @@ components:
         - type: object
           properties:
             id: {type: integer}
+            ticket_number: {type: integer, description: "Sequential display number, formatted as TRF-000 on the frontend."}
             project_id: {type: integer}
+            tags:
+              type: array
+              items: {$ref: '#/components/schemas/Tag'}
             attachments:
               type: array
               items: {$ref: '#/components/schemas/Attachment'}
@@ -304,11 +377,29 @@ components:
         file_name: {type: string}
         mime_type: {type: string}
         file_size: {type: integer}
+    ProjectAttachment:
+      type: object
+      properties:
+        id: {type: integer}
+        project_id: {type: integer}
+        file_path: {type: string}
+        file_name: {type: string}
+        mime_type: {type: string}
+        file_size: {type: integer}
+    DashboardData:
+      type: object
+      description: Consolidated data for the overview page, scoped to the authenticated user.
+      properties:
+        projects:
+          type: array
+          items: {$ref: '#/components/schemas/Project'}
+        tasks:
+          type: array
+          items: {$ref: '#/components/schemas/Task'}
     AuthResponse:
       type: object
       properties:
         user: {$ref: '#/components/schemas/User'}
-        token: {type: string}
     UserResponse:
       type: object
       properties: {user: {$ref: '#/components/schemas/User'}}
@@ -320,9 +411,16 @@ components:
       type: object
       properties:
         data: {type: array, items: {$ref: '#/components/schemas/Task'}}
+    TagCollection:
+      type: object
+      properties:
+        data: {type: array, items: {$ref: '#/components/schemas/Tag'}}
     AttachmentResponse:
       type: object
       properties: {data: {$ref: '#/components/schemas/Attachment'}}
+    ProjectAttachmentResponse:
+      type: object
+      properties: {data: {$ref: '#/components/schemas/ProjectAttachment'}}
   responses:
     AuthResponse:
       description: Authentication successful
@@ -333,12 +431,23 @@ components:
       description: Project
       content:
         application/json:
-          schema: {$ref: '#/components/schemas/Project'}
+          schema:
+            type: object
+            properties: {data: {$ref: '#/components/schemas/Project'}}
     TaskResponse:
       description: Task
       content:
         application/json:
-          schema: {$ref: '#/components/schemas/Task'}
+          schema:
+            type: object
+            properties: {data: {$ref: '#/components/schemas/Task'}}
+    DashboardResponse:
+      description: Dashboard data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties: {data: {$ref: '#/components/schemas/DashboardData'}}
     ValidationError: {description: Validation error}
     Unauthorized: {description: Authentication required}
     Forbidden: {description: Access denied}

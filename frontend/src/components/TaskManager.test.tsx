@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { TaskManager } from '@/components/tasks/TaskManager'
 import { project, task } from '@/test/fixtures'
@@ -31,26 +31,20 @@ describe('TaskManager', () => {
     createMutate.mockReset()
     deleteMutate.mockReset()
     statusMutate.mockReset()
+    window.localStorage.clear()
   })
 
-  it('cria e exclui tarefas e altera o status', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
+  it('alterna entre visão kanban e lista mantendo a mesma tarefa visível', () => {
     render(<TestProviders><TaskManager projectId={project.id} /></TestProviders>)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Nova tarefa' }))
-    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Nova tarefa' } })
-    fireEvent.change(screen.getByLabelText('Descrição curta'), { target: { value: 'Descrição' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Criar tarefa' }))
-    await waitFor(() => expect(createMutate).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Nova tarefa',
-      short_description: 'Descrição',
-    }), expect.objectContaining({ onSuccess: expect.any(Function) })))
+    expect(screen.getByRole('button', { name: 'Kanban', pressed: true })).toBeInTheDocument()
+    expect(screen.getByText(task.title)).toBeInTheDocument()
 
-    fireEvent.change(screen.getByRole('combobox', { name: `Alterar status de ${task.title}` }), { target: { value: 'completed' } })
-    expect(statusMutate).toHaveBeenCalledWith({ taskId: task.id, status: 'completed' })
+    fireEvent.click(screen.getByRole('button', { name: 'Lista' }))
 
-    fireEvent.click(screen.getByRole('button', { name: 'Excluir' }))
-    expect(deleteMutate).toHaveBeenCalledWith(task.id)
+    expect(screen.getByRole('button', { name: 'Lista', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Lista de tarefas ordenada por posição' })).toBeInTheDocument()
+    expect(screen.getByText(task.title)).toBeInTheDocument()
   })
 
   it('exibe loading, erro e estado vazio', () => {

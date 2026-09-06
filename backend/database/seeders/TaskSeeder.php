@@ -21,16 +21,8 @@ class TaskSeeder extends Seeder
             TaskStatus::InProgress,
             TaskStatus::Completed,
             TaskStatus::Completed,
-            TaskStatus::Completed,
-            TaskStatus::Completed,
-            TaskStatus::Completed,
             TaskStatus::Cancelled,
-            TaskStatus::Pending,
-            TaskStatus::InProgress,
-            TaskStatus::Completed,
-            TaskStatus::Completed,
-            TaskStatus::Completed,
-            TaskStatus::Cancelled,
+            TaskStatus::Cancelled
         ];
 
         foreach ($statuses as $index => $status) {
