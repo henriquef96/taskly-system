@@ -41,9 +41,9 @@ URLs locais:
 
 ## Autenticação e API
 
-A API usa Sanctum stateful com sessão/cookie e proteção CSRF. Não há token Bearer
-no contrato atual. O frontend inicializa `/sanctum/csrf-cookie` antes de login
-ou cadastro e consulta `/api/me`; respostas `401` representam visitante não
+A API usa tokens Bearer do Sanctum. O frontend recebe o token em `/api/login`
+ou `/api/register`, envia `Authorization: Bearer {token}` nas requisições
+seguintes e consulta `/api/me`; respostas `401` representam visitante não
 autenticado.
 
 Principais grupos:

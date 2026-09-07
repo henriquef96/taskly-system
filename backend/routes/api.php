@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
-// Rotas públicas de autenticação (gerenciadas nativamente pelo statefulApi)
+// Rotas públicas de autenticação que emitem tokens Sanctum.
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
 

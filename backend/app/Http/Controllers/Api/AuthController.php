@@ -11,7 +11,6 @@ use App\Services\ChangePasswordService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -20,10 +19,12 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create($request->validated());
-        Auth::guard('web')->login($user);
-        $request->session()->regenerate();
+        $token = $user->createToken('taskly-spa')->plainTextToken;
 
-        return (new UserResource($user))->response()->setStatusCode(201);
+        return response()->json([
+            'user' => (new UserResource($user))->resolve(),
+            'token' => $token,
+        ], 201);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -37,10 +38,12 @@ class AuthController extends Controller
             ], 401);
         }
 
-        Auth::guard('web')->login($user);
-        $request->session()->regenerate();
+        $token = $user->createToken('taskly-spa')->plainTextToken;
 
-        return (new UserResource($user))->response();
+        return response()->json([
+            'user' => (new UserResource($user))->resolve(),
+            'token' => $token,
+        ]);
     }
 
     public function me(Request $request): UserResource
@@ -54,9 +57,6 @@ class AuthController extends Controller
         if ($token instanceof PersonalAccessToken) {
             $token->delete();
         }
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
 
         return response()->json([
             'message' => 'Logout realizado com sucesso.',

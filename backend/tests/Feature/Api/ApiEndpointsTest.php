@@ -15,7 +15,7 @@ class ApiEndpointsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_register_creates_a_user_and_starts_a_session(): void
+    public function test_register_creates_a_user_and_returns_a_bearer_token(): void
     {
         $response = $this->postJson('/api/register', [
             'name' => 'Ana Silva',
@@ -26,8 +26,7 @@ class ApiEndpointsTest extends TestCase
 
         $response
             ->assertCreated()
-            ->assertJsonStructure(['user' => ['id', 'name', 'email']])
-            ->assertJsonMissingPath('token')
+            ->assertJsonStructure(['user' => ['id', 'name', 'email'], 'token'])
             ->assertJsonPath('user.email', 'ana@example.com');
         $this->assertTrue(
             DB::table('users')->where('email', 'ana@example.com')->exists(),
@@ -35,22 +34,22 @@ class ApiEndpointsTest extends TestCase
         );
     }
 
-    public function test_login_starts_a_session_for_valid_credentials_and_rejects_invalid_credentials(): void
+    public function test_login_returns_a_bearer_token_for_valid_credentials_and_rejects_invalid_credentials(): void
     {
         User::factory()->create([
             'email' => 'ana@example.com',
             'password' => 'Senha@123',
         ]);
 
-        $this->withHeaders([
+        $loginResponse = $this->withHeaders([
             'Origin' => 'http://localhost:5173',
             'Referer' => 'http://localhost:5173/login',
         ])->postJson('/api/login', [
             'email' => 'ana@example.com',
             'password' => 'Senha@123',
-        ])->assertOk()->assertJsonStructure(['user'])->assertJsonMissingPath('token');
+        ])->assertOk()->assertJsonStructure(['user', 'token']);
 
-        $this->withHeaders([
+        $this->withToken($loginResponse->json('token'))->withHeaders([
             'Origin' => 'http://localhost:5173',
             'Referer' => 'http://localhost:5173/dashboard',
         ])->getJson('/api/me')
@@ -104,23 +103,11 @@ class ApiEndpointsTest extends TestCase
         $this->assertDatabaseMissing('personal_access_tokens', ['id' => $token->accessToken->id]);
     }
 
-    public function test_cookie_session_user_can_logout_and_is_no_longer_authenticated(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user, 'web')
-            ->postJson('/api/logout')
-            ->assertOk()
-            ->assertJson(['message' => 'Logout realizado com sucesso.']);
-
-        $this->assertGuest('web');
-    }
-
     public function test_authenticated_user_can_change_their_password_with_the_current_password(): void
     {
         $user = User::factory()->create(['password' => 'Senha@123']);
 
-        $this->actingAs($user, 'web')
+        $this->withToken($user->createToken('test-token')->plainTextToken)
             ->patchJson('/api/password', [
                 'current_password' => 'Senha@123',
                 'password' => 'NovaSenha@456',
@@ -136,7 +123,7 @@ class ApiEndpointsTest extends TestCase
     {
         $user = User::factory()->create(['password' => 'Senha@123']);
 
-        $this->actingAs($user, 'web')
+        $this->withToken($user->createToken('test-token')->plainTextToken)
             ->patchJson('/api/password', [
                 'current_password' => 'senha-incorreta',
                 'password' => 'NovaSenha@456',

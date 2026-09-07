@@ -307,10 +307,10 @@ paths:
 components:
   securitySchemes:
     sanctum:
-      type: apiKey
-      in: cookie
-      name: taskly-system-session
-      description: Laravel Sanctum stateful session cookie. Obtain XSRF-TOKEN before state-changing requests.
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+      description: Laravel Sanctum personal access token.
   parameters:
     ProjectId:
       name: project
@@ -432,8 +432,10 @@ components:
           items: {$ref: '#/components/schemas/Task'}
     AuthResponse:
       type: object
+      required: [user, token]
       properties:
         user: {$ref: '#/components/schemas/User'}
+        token: {type: string, description: Bearer token for subsequent API requests}
     UserResponse:
       type: object
       properties: {user: {$ref: '#/components/schemas/User'}}

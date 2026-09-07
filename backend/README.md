@@ -1,7 +1,7 @@
 # Taskly Backend
 
 API REST do Taskly, construída com PHP 8.4, Laravel 13, PostgreSQL e Sanctum.
-O frontend usa autenticação stateful por sessão/cookie.
+O frontend usa autenticação por token Bearer.
 
 ## Desenvolvimento
 
@@ -26,7 +26,6 @@ Endpoints locais:
 
 - configure `APP_URL` com HTTPS;
 - forneça `APP_KEY`, `DB_PASSWORD` e demais segredos por secret manager;
-- ajuste `SANCTUM_STATEFUL_DOMAINS` para as origens reais;
 - não publique a porta do PostgreSQL;
 - execute migrations com `php artisan migrate --force`.
 
@@ -36,11 +35,11 @@ legados não podem ser atribuídos com segurança a um único usuário.
 
 ## Contrato da API
 
-A autenticação não retorna token Bearer. O fluxo é:
+A autenticação retorna um token Bearer. O fluxo é:
 
-1. `GET /sanctum/csrf-cookie`;
-2. `POST /api/login` ou `POST /api/register`;
-3. manter os cookies de sessão e CSRF nas requisições seguintes.
+1. `POST /api/login` ou `POST /api/register`;
+2. enviar `Authorization: Bearer {token}` nas requisições seguintes;
+3. `POST /api/logout` revoga o token atual.
 
 Rotas relevantes:
 

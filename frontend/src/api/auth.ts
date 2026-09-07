@@ -1,20 +1,17 @@
 import { httpClient } from '@/api/httpClient'
+import { clearAuthToken, storeAuthToken } from '@/api/authToken'
 import type { AuthResponse, UserResponse } from '@/types/api'
 import type { ChangePasswordInput, LoginInput, RegisterInput } from '@/types/auth'
 
-async function initializeCsrfCookie(): Promise<void> {
-  await httpClient.get('/sanctum/csrf-cookie')
-}
-
 export async function login(input: LoginInput): Promise<AuthResponse> {
-  await initializeCsrfCookie()
   const { data } = await httpClient.post<AuthResponse>('/login', input)
+  storeAuthToken(data.token)
   return data
 }
 
 export async function register(input: RegisterInput): Promise<AuthResponse> {
-  await initializeCsrfCookie()
   const { data } = await httpClient.post<AuthResponse>('/register', input)
+  storeAuthToken(data.token)
   return data
 }
 
@@ -22,11 +19,19 @@ export async function getCurrentUser(): Promise<UserResponse | null> {
   const response = await httpClient.get<UserResponse>('/me', {
     validateStatus: (status) => status === 200 || status === 401,
   })
-  return response.status === 401 ? null : response.data
+  if (response.status === 401) {
+    clearAuthToken()
+    return null
+  }
+  return response.data
 }
 
 export async function logout(): Promise<void> {
-  await httpClient.post('/logout')
+  try {
+    await httpClient.post('/logout')
+  } finally {
+    clearAuthToken()
+  }
 }
 
 export async function changePassword(input: ChangePasswordInput): Promise<void> {
