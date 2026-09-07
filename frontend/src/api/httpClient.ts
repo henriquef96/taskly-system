@@ -3,8 +3,11 @@ import { ApiError, isApiErrorPayload } from '@/api/ApiError'
 import { env } from '@/config/env'
 
 export const httpClient = axios.create({
-  baseURL: env.apiUrl,
-  headers: { Accept: 'application/json' },
+  baseURL: `${env.apiUrl.replace(/\/$/, '')}/api`,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
   withCredentials: true,
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
