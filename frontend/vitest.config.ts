@@ -4,7 +4,6 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/taskly-system',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
