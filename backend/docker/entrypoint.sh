@@ -18,8 +18,4 @@ else
     php artisan migrate --force
 fi
 
-if [ "$#" -eq 1 ]; then
-    exec sh -c "$1"
-fi
-
-exec "$@"
+exec sh -c "$*"
