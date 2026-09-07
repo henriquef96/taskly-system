@@ -1,0 +1,10 @@
+# IDEs e editores
+.vscode/
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Ambiente
+*.log
