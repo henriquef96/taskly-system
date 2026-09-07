@@ -39,4 +39,4 @@ RUN composer install --optimize-autoloader --no-interaction --prefer-dist \
 EXPOSE 9000
 
 ENTRYPOINT ["taskly-entrypoint"]
-CMD ["php-fpm"]
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
