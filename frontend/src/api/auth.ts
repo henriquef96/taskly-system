@@ -1,9 +1,20 @@
+<<<<<<< HEAD
+=======
+// auth.ts
+>>>>>>> master
 import { httpClient } from '@/api/httpClient'
+import { env } from '@/config/env'
 import type { AuthResponse, UserResponse } from '@/types/api'
 import type { ChangePasswordInput, LoginInput, RegisterInput } from '@/types/auth'
 
 async function initializeCsrfCookie(): Promise<void> {
+<<<<<<< HEAD
   await httpClient.get('/sanctum/csrf-cookie')
+=======
+  await httpClient.get('/sanctum/csrf-cookie', {
+    baseURL: env.apiUrl.replace(/\/$/, ''),
+  })
+>>>>>>> master
 }
 
 export async function login(input: LoginInput): Promise<AuthResponse> {

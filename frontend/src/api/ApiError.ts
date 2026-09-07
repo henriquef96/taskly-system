@@ -3,9 +3,6 @@ export interface ApiErrorPayload {
   errors?: Record<string, string[]>
 }
 
-/**
- * Erro tipado lançado quando a API REST retorna uma resposta de falha.
- */
 export class ApiError extends Error {
   readonly status: number
   readonly errors: Record<string, string[]>
