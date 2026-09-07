@@ -21,6 +21,7 @@ RUN apk add --no-cache \
         opcache
 
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY docker/entrypoint.sh /usr/local/bin/taskly-entrypoint
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -31,8 +32,11 @@ COPY . .
 RUN composer install --optimize-autoloader --no-interaction --prefer-dist \
     && chown -R www-data:www-data storage bootstrap/cache \
     && find storage bootstrap/cache -type d -exec chmod 0770 {} + \
-    && find storage bootstrap/cache -type f -exec chmod 0660 {} +
+    && find storage bootstrap/cache -type f -exec chmod 0660 {} + \
+    && sed -i 's/\r$//' /usr/local/bin/taskly-entrypoint \
+    && chmod +x /usr/local/bin/taskly-entrypoint
 
 EXPOSE 9000
 
-CMD ["sh", "-c", "mkdir -p /var/www/html/storage/app/private /var/www/html/storage/framework/cache /var/www/html/storage/framework/sessions /var/www/html/storage/framework/views /var/www/html/bootstrap/cache && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache && exec php-fpm"]
+ENTRYPOINT ["taskly-entrypoint"]
+CMD ["php-fpm"]
