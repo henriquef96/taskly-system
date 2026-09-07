@@ -12,7 +12,13 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
   const login = useLogin()
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) })
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'admin@admin.com',
+      password: 'admin@2026',
+    },
+  })
   const serverErrors = login.error instanceof ApiError ? login.error.errors : {} as Record<string, string[]>
 
   function onSubmit(form: LoginFormValues) {

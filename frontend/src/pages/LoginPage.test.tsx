@@ -17,6 +17,17 @@ describe('LoginPage', () => {
     loginState = { error: null, isPending: false }
   })
 
+  it('preenche as credenciais de teste', () => {
+    render(
+      <TestProviders initialEntries={['/login']}>
+        <LoginPage />
+      </TestProviders>,
+    )
+
+    expect(screen.getByLabelText('E-mail')).toHaveValue('admin@admin.com')
+    expect(screen.getByLabelText('Senha')).toHaveValue('admin@2026')
+  })
+
   it('submits valid credentials and navigates after a successful login', async () => {
     mutate.mockImplementation((_input: unknown, options: { onSuccess: () => void }) => options.onSuccess())
 

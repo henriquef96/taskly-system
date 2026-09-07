@@ -1,11 +1,26 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { copyFileSync } from 'node:fs'
+import { resolve as resolvePath } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
+
+function githubPagesFallback(): Plugin {
+  return {
+    name: 'github-pages-fallback',
+    writeBundle(options) {
+      const outputDirectory = options.dir ?? 'dist'
+      copyFileSync(
+        resolvePath(outputDirectory, 'index.html'),
+        resolvePath(outputDirectory, '404.html'),
+      )
+    },
+  }
+}
 
 export default defineConfig({
   base: '/taskly-system/',
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), githubPagesFallback()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

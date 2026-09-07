@@ -10,7 +10,7 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.PROD ? '/taskly-system' : undefined}>
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider><App /></AuthProvider>
