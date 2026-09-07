@@ -1,10 +1,9 @@
-import axios from 'axios'
 import { httpClient } from '@/api/httpClient'
 import type { AuthResponse, UserResponse } from '@/types/api'
 import type { ChangePasswordInput, LoginInput, RegisterInput } from '@/types/auth'
 
 async function initializeCsrfCookie(): Promise<void> {
-  await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+  await httpClient.get('/sanctum/csrf-cookie')
 }
 
 export async function login(input: LoginInput): Promise<AuthResponse> {
