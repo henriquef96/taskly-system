@@ -14,8 +14,7 @@ chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
 
 if [ "${RUN_FRESH:-false}" = "true" ]; then
     php artisan migrate:fresh --seed --force
-else
-    php artisan migrate --force
+
 fi
 
 if [ "$#" -eq 1 ]; then

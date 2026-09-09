@@ -1,6 +1,7 @@
 import { useContext } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as authApi from '@/api/auth'
+import { getAuthToken } from '@/api/authToken'
 import { AuthContext } from '@/auth/AuthContext'
 import { ApiError } from '@/api/ApiError'
 import { useToast } from '@/components/toast/ToastProvider'
@@ -22,6 +23,7 @@ export function useCurrentUser() {
       }
     },
     retry: false,
+    enabled: Boolean(getAuthToken()),
   })
 }
 

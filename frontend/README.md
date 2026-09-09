@@ -1,6 +1,6 @@
 # Taskly Frontend
 
-SPA React 19 com TypeScript, Vite, Tailwind CSS, TanStack Query, Axios e
+SPA React 19 com TypeScript, Vite, Tailwind CSS, Axios e
 React Router.
 
 ## Executar

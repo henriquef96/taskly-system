@@ -1,12 +1,11 @@
 # Taskly
 
-Aplicação full-stack para organização de projetos, tarefas, tags, prazos e
-anexos privados.
+Aplicação full-stack para organização e gerenciamento de projetos, tarefas, prazos e entregas.
 
 ## Stack
 
-- **Backend:** PHP 8.4, Laravel 13, PostgreSQL e Laravel Sanctum.
-- **Frontend:** React 19, TypeScript 6, Vite 8, Tailwind CSS 4 e TanStack Query 5.
+- **Backend:** PHP 8.4, Laravel 13, PostgreSQL.
+- **Frontend:** React 19, TypeScript 6, Vite 8, Tailwind CSS.
 - **Infraestrutura:** Docker Compose, PHP-FPM e Nginx.
 
 ## Estrutura
@@ -16,7 +15,7 @@ backend/                 API Laravel, migrations e testes PHPUnit
 frontend/                SPA React, componentes, hooks e testes Vitest
 docker/nginx/             Configuração do proxy/web server
 .github/instructions/     Regras de arquitetura, dados e testes
-.github/docs/             Spec, uso de IA e evidências do case
+.github/docs/             Spec, uso de IA
 .github/prompts/          Prompts versionados de backend e frontend
 docker-compose.yml        Ambiente local integrado
 ```
